@@ -7,7 +7,7 @@ DISPLAY_SIZE = 200
 MARGIN = 20
 SCALE = 4   # supersampling factor for smoothness. Higher numbers = smoother
 ARC_THICKNESS = 15
-ARC_START_ANGLE = 270
+ARC_START_ANGLE = 45
 ARC_STOP_ANGLE  = 90
 
 
@@ -26,9 +26,14 @@ CENTER = SIZE // 2
 RADIUS = (SIZE // 2) - MARGIN
 INTERNAL_THICKNESS = ARC_THICKNESS * SCALE
 
-# Angle mapping
-START_ANGLE = (90 - ARC_START_ANGLE) % 360
-END_ANGLE = (90 - ARC_STOP_ANGLE) % 360
+
+# --- Angle mapping (clock face to PIL, counterclockwise fill) ---
+def clock_to_pil(angle):
+    return (90 - angle) % 360
+
+START_ANGLE = clock_to_pil(ARC_STOP_ANGLE)
+END_ANGLE = clock_to_pil(ARC_START_ANGLE)
+# For clockwise fill, range is (END - START) % 360
 ANGLE_RANGE = (END_ANGLE - START_ANGLE) % 360
 
 # Colors
@@ -54,12 +59,13 @@ def draw_arc(percent):
         CENTER + RADIUS
     ]
 
-    # Draw full background arc
+
+
+    # Draw full background arc (from START to END, clockwise)
     draw.arc(bbox, START_ANGLE, END_ANGLE, fill=EMPTY_COLOR, width=INTERNAL_THICKNESS)
 
-    # Calculate filled angle
-    fill_angle = START_ANGLE + (percent / 100.0) * ANGLE_RANGE
-
+    # Calculate filled angle for clockwise fill
+    fill_angle = (START_ANGLE + (percent / 100.0) * ANGLE_RANGE) % 360
 
     # Draw filled arc
     color = get_color(percent)
@@ -75,12 +81,13 @@ def draw_arc(percent):
         y = center + radius * math.sin(angle_rad)
         return (x, y)
 
+
     # Use the midpoint of the arc's thickness for cap centers
     track_radius = RADIUS - (INTERNAL_THICKNESS / 2)
     start_xy = polar_to_cartesian(CENTER, track_radius, START_ANGLE)
     end_xy = polar_to_cartesian(CENTER, track_radius, fill_angle)
 
-    # Add rounded cap to the end of the gray (unfilled) arc FIRST
+    # Add rounded cap to the end of the gray (unfilled) arc FIRST (at END_ANGLE)
     gray_cap_radius = INTERNAL_THICKNESS // 2
     gray_end_xy = polar_to_cartesian(CENTER, track_radius, END_ANGLE)
     bbox_gray_cap = [
