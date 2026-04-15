@@ -1,0 +1,22 @@
+{
+  "name": "lib_template",
+  "version": "1.0.0",
+  "keywords": "",
+  "description": "",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/Rubix-Battery/lib_template"
+  },
+  "authors":
+  [
+    {
+        "name": "author_name",
+        "email": "author_email",
+        "maintainer": true
+    }
+  ],
+  "frameworks": "arduino",
+  "platforms": "espressif32",
+  "headers": ""
+}
