@@ -3,13 +3,13 @@ from PIL import Image, ImageDraw
 # Image settings
 SIZE = 800  # high-res output size (square)
 DISPLAY_SIZE = 200  # final display size (square)
-SCALE = 12   # supersampling factor for smoothness
+SCALE = 4   # supersampling factor for smoothness
 BIG_SIZE = SIZE * SCALE
 CENTER = BIG_SIZE // 2
 # RADIUS = 80 * SCALE
-MARGIN = 10
+MARGIN = 20
 RADIUS = (BIG_SIZE // 2) - MARGIN
-THICKNESS = 10 * SCALE
+THICKNESS = 50 * SCALE
 
 # Angle mapping
 START_ANGLE = 135
