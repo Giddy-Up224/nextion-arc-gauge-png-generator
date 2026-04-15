@@ -63,6 +63,18 @@ def draw_arc(percent):
     start_xy = polar_to_cartesian(CENTER, track_radius, START_ANGLE)
     end_xy = polar_to_cartesian(CENTER, track_radius, fill_angle)
 
+    # Add rounded cap to the end of the gray (unfilled) arc FIRST
+    gray_cap_radius = THICKNESS // 2
+    gray_end_xy = polar_to_cartesian(CENTER, track_radius, END_ANGLE)
+    bbox_gray_cap = [
+        gray_end_xy[0] - gray_cap_radius,
+        gray_end_xy[1] - gray_cap_radius,
+        gray_end_xy[0] + gray_cap_radius,
+        gray_end_xy[1] + gray_cap_radius
+    ]
+    draw.ellipse(bbox_gray_cap, fill=EMPTY_COLOR)
+
+    # Now draw colored arc caps so they overwrite if needed
     cap_radius = THICKNESS // 2
     for xy in [start_xy, end_xy]:
         bbox_cap = [
@@ -73,18 +85,6 @@ def draw_arc(percent):
         ]
         draw.ellipse(bbox_cap, fill=color)
 
-
-    # Add rounded cap to the end of the gray (unfilled) arc
-    gray_cap_radius = THICKNESS // 2
-    # The end of the gray arc is at END_ANGLE
-    gray_end_xy = polar_to_cartesian(CENTER, track_radius, END_ANGLE)
-    bbox_gray_cap = [
-        gray_end_xy[0] - gray_cap_radius,
-        gray_end_xy[1] - gray_cap_radius,
-        gray_end_xy[0] + gray_cap_radius,
-        gray_end_xy[1] + gray_cap_radius
-    ]
-    draw.ellipse(bbox_gray_cap, fill=EMPTY_COLOR)
 
     # Downscale to high-res output size
     img_hr = img.resize((SIZE, SIZE), resample=Image.LANCZOS)
