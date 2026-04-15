@@ -1,15 +1,28 @@
 from PIL import Image, ImageDraw
 
+#################################################################
+##################      USER SETTINGS          ##################
+#################################################################
+
+
+
+
+
+
+
+
+#################################################################
+##############      DO NOT TOUCH SETTINGS          ##############
+#################################################################
 # Image settings
-SIZE = 800  # high-res output size (square)
 DISPLAY_SIZE = 200  # final display size (square)
 SCALE = 4   # supersampling factor for smoothness
-BIG_SIZE = SIZE * SCALE
-CENTER = BIG_SIZE // 2
+SIZE = DISPLAY_SIZE * SCALE
+CENTER = SIZE // 2
 # RADIUS = 80 * SCALE
 MARGIN = 20
-RADIUS = (BIG_SIZE // 2) - MARGIN
-THICKNESS = 50 * SCALE
+RADIUS = (SIZE // 2) - MARGIN
+THICKNESS = 10 * SCALE
 
 # Angle mapping
 START_ANGLE = 135
@@ -29,7 +42,7 @@ def get_color(percent):
 
 def draw_arc(percent):
     # Draw at high resolution for antialiasing
-    img = Image.new("RGBA", (BIG_SIZE, BIG_SIZE), BG_COLOR)
+    img = Image.new("RGBA", (SIZE, SIZE), BG_COLOR)
     draw = ImageDraw.Draw(img)
 
     bbox = [
@@ -88,16 +101,14 @@ def draw_arc(percent):
         draw.ellipse(bbox_cap, fill=color)
 
 
-    # Downscale to high-res output size
-    img_hr = img.resize((SIZE, SIZE), resample=Image.LANCZOS)
-    # Downscale to display size
-    img_display = img_hr.resize((DISPLAY_SIZE, DISPLAY_SIZE), resample=Image.LANCZOS)
-    return img_hr, img_display
+    # Downscale to display size only
+    img_display = img.resize((DISPLAY_SIZE, DISPLAY_SIZE), resample=Image.LANCZOS)
+    return img_display
+
 
 # Generate 0–100%, in increments of 5
 for i in range(0, 101, 5):
-    img_hr, img_display = draw_arc(i)
-    img_hr.save(f"out/soc_{i:03d}_hr.png")
+    img_display = draw_arc(i)
     img_display.save(f"out/soc_{i:03d}.png")
 
 print("Done.")
