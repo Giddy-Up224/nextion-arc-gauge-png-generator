@@ -3,14 +3,15 @@ from PIL import Image, ImageDraw
 #################################################################
 ##################      USER SETTINGS          ##################
 #################################################################
-DISPLAY_SIZE = 200
-MARGIN = 20
-SCALE = 4   # supersampling factor for smoothness. Higher numbers = smoother
-ARC_THICKNESS = 15
+DISPLAY_SIZE    = 200
+MARGIN          = 20
+SCALE           = 4   # supersampling factor for smoothness. Higher numbers = smoother
+ARC_THICKNESS   = 15
 ARC_START_ANGLE = 300
 ARC_STOP_ANGLE  = 60
-
-
+ARC_COLOR       = (0, 0, 255) # Red, Green, Blue
+ARC_BG_COLOR    = (0, 100, 100) # Red, Green, Blue
+TICK_STEP       = 2
 
 
 
@@ -39,14 +40,7 @@ ANGLE_RANGE = (END_ANGLE - START_ANGLE) % 360
 
 # Colors
 BG_COLOR = (0, 0, 0, 0)  # transparent background
-EMPTY_COLOR = (80, 80, 80)
-
-def get_color(percent):
-    """Example color gradient: red -> yellow -> green"""
-    if percent < 50:
-        return (255, int(5.1 * percent), 0)  # red → yellow
-    else:
-        return (int(255 - 5.1 * (percent - 50)), 255, 0)  # yellow → green
+EMPTY_COLOR = ARC_BG_COLOR
 
 def draw_arc(percent):
     # Draw at high resolution for antialiasing
@@ -69,8 +63,7 @@ def draw_arc(percent):
     fill_angle = (START_ANGLE + (percent / 100.0) * ANGLE_RANGE) % 360
 
     # Draw filled arc
-    color = get_color(percent)
-    draw.arc(bbox, START_ANGLE, fill_angle, fill=color, width=INTERNAL_THICKNESS)
+    draw.arc(bbox, START_ANGLE, fill_angle, fill=ARC_COLOR, width=INTERNAL_THICKNESS)
 
     # Draw rounded ends (caps) for the filled arc
     import math
@@ -108,7 +101,7 @@ def draw_arc(percent):
             xy[0] + cap_radius,
             xy[1] + cap_radius
         ]
-        draw.ellipse(bbox_cap, fill=color)
+        draw.ellipse(bbox_cap, fill=ARC_COLOR)
 
 
     # Downscale to display size only
@@ -117,7 +110,7 @@ def draw_arc(percent):
 
 
 # Generate 0–100%, in increments of 5
-for i in range(0, 101, 5):
+for i in range(0, 101, TICK_STEP):
     img_display = draw_arc(i)
     img_display.save(f"out/soc_{i:03d}.png")
 
