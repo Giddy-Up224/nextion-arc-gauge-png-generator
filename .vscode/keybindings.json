@@ -1,0 +1,9 @@
+[
+    {
+        // Keybinding for deleting all PNG files in the root
+        "key": "ctrl+alt+d",
+        "command": "workbench.action.tasks.runTask",
+        "args": "delete-pngs",
+        "when": "editorTextFocus"
+    }
+]
