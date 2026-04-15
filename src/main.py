@@ -6,7 +6,9 @@ DISPLAY_SIZE = 200  # final display size (square)
 SCALE = 12   # supersampling factor for smoothness
 BIG_SIZE = SIZE * SCALE
 CENTER = BIG_SIZE // 2
-RADIUS = 80 * SCALE
+# RADIUS = 80 * SCALE
+MARGIN = 10
+RADIUS = (BIG_SIZE // 2) - MARGIN
 THICKNESS = 10 * SCALE
 
 # Angle mapping
