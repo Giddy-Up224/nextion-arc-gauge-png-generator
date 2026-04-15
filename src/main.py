@@ -3,7 +3,12 @@ from PIL import Image, ImageDraw
 #################################################################
 ##################      USER SETTINGS          ##################
 #################################################################
-
+DISPLAY_SIZE = 200
+MARGIN = 20
+SCALE = 4   # supersampling factor for smoothness. Higher numbers = smoother
+ARC_THICKNESS = 15
+ARC_START_ANGLE = 270
+ARC_STOP_ANGLE  = 90
 
 
 
@@ -15,18 +20,15 @@ from PIL import Image, ImageDraw
 ##############      DO NOT TOUCH SETTINGS          ##############
 #################################################################
 # Image settings
-DISPLAY_SIZE = 200  # final display size (square)
-SCALE = 4   # supersampling factor for smoothness
 SIZE = DISPLAY_SIZE * SCALE
 CENTER = SIZE // 2
 # RADIUS = 80 * SCALE
-MARGIN = 20
 RADIUS = (SIZE // 2) - MARGIN
-THICKNESS = 10 * SCALE
+INTERNAL_THICKNESS = ARC_THICKNESS * SCALE
 
 # Angle mapping
-START_ANGLE = 135
-END_ANGLE = 45
+START_ANGLE = (90 - ARC_START_ANGLE) % 360
+END_ANGLE = (90 - ARC_STOP_ANGLE) % 360
 ANGLE_RANGE = (END_ANGLE - START_ANGLE) % 360
 
 # Colors
@@ -53,7 +55,7 @@ def draw_arc(percent):
     ]
 
     # Draw full background arc
-    draw.arc(bbox, START_ANGLE, END_ANGLE, fill=EMPTY_COLOR, width=THICKNESS)
+    draw.arc(bbox, START_ANGLE, END_ANGLE, fill=EMPTY_COLOR, width=INTERNAL_THICKNESS)
 
     # Calculate filled angle
     fill_angle = START_ANGLE + (percent / 100.0) * ANGLE_RANGE
@@ -61,7 +63,7 @@ def draw_arc(percent):
 
     # Draw filled arc
     color = get_color(percent)
-    draw.arc(bbox, START_ANGLE, fill_angle, fill=color, width=THICKNESS)
+    draw.arc(bbox, START_ANGLE, fill_angle, fill=color, width=INTERNAL_THICKNESS)
 
     # Draw rounded ends (caps) for the filled arc
     import math
@@ -74,12 +76,12 @@ def draw_arc(percent):
         return (x, y)
 
     # Use the midpoint of the arc's thickness for cap centers
-    track_radius = RADIUS - (THICKNESS / 2)
+    track_radius = RADIUS - (INTERNAL_THICKNESS / 2)
     start_xy = polar_to_cartesian(CENTER, track_radius, START_ANGLE)
     end_xy = polar_to_cartesian(CENTER, track_radius, fill_angle)
 
     # Add rounded cap to the end of the gray (unfilled) arc FIRST
-    gray_cap_radius = THICKNESS // 2
+    gray_cap_radius = INTERNAL_THICKNESS // 2
     gray_end_xy = polar_to_cartesian(CENTER, track_radius, END_ANGLE)
     bbox_gray_cap = [
         gray_end_xy[0] - gray_cap_radius,
@@ -90,7 +92,7 @@ def draw_arc(percent):
     draw.ellipse(bbox_gray_cap, fill=EMPTY_COLOR)
 
     # Now draw colored arc caps so they overwrite if needed
-    cap_radius = THICKNESS // 2
+    cap_radius = INTERNAL_THICKNESS // 2
     for xy in [start_xy, end_xy]:
         bbox_cap = [
             xy[0] - cap_radius,
