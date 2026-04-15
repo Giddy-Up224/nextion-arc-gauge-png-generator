@@ -1,117 +1,121 @@
 from PIL import Image, ImageDraw
+import math
 
 #################################################################
 ##################      USER SETTINGS          ##################
 #################################################################
-DISPLAY_SIZE    = 200
-MARGIN          = 20
-SCALE           = 4   # supersampling factor for smoothness. Higher numbers = smoother
-ARC_THICKNESS   = 15
-ARC_START_ANGLE = 300
-ARC_STOP_ANGLE  = 60
-ARC_COLOR       = (0, 0, 255) # Red, Green, Blue
-ARC_BG_COLOR    = (0, 100, 100) # Red, Green, Blue
-TICK_STEP       = 2
-
-
-
+DISPLAY_SIZE     = 200
+MARGIN           = 20
+SCALE            = 4
+ARC_THICKNESS    = 15
+ARC_START_ANGLE  = 270  # your system
+ARC_STOP_ANGLE   = 90  # your system
+ARC_COLOR        = (0, 0, 255)
+ARC_BG_COLOR     = (0, 100, 100)
+TICK_STEP        = 2
 
 
 #################################################################
-##############      DO NOT TOUCH SETTINGS          ##############
+##############      INTERNAL SETTINGS          ##################
 #################################################################
-# Image settings
 SIZE = DISPLAY_SIZE * SCALE
 CENTER = SIZE // 2
-# RADIUS = 80 * SCALE
 RADIUS = (SIZE // 2) - MARGIN
 INTERNAL_THICKNESS = ARC_THICKNESS * SCALE
 
+BG_COLOR = (0, 0, 0, 0)
+EMPTY_COLOR = ARC_BG_COLOR
 
-# --- Angle mapping (clock face to PIL, counterclockwise fill) ---
+
+#################################################################
+##################   ANGLE HANDLING (FIXED)   ##################
+#################################################################
+
+
 def user_to_pil(angle):
     return (90 - angle) % 360
 
-START_ANGLE = user_to_pil(ARC_START_ANGLE)
-END_ANGLE = user_to_pil(ARC_STOP_ANGLE)
 
-# For clockwise fill, range is (END - START) % 360
-ANGLE_RANGE = (END_ANGLE - START_ANGLE) % 360
+# Work entirely in USER space (clockwise)
+ANGLE_RANGE = (ARC_START_ANGLE - ARC_STOP_ANGLE) % 360
 
-# Colors
-BG_COLOR = (0, 0, 0, 0)  # transparent background
-EMPTY_COLOR = ARC_BG_COLOR
+
+def polar_to_cartesian(center, radius, angle_user):
+    angle_math = (90 - angle_user) % 360
+    angle_rad = math.radians(angle_math)
+
+    x = center + radius * math.cos(angle_rad)
+    y = center + radius * math.sin(angle_rad)
+    return (x, y)
+
+
+#################################################################
+##################        DRAW FUNCTION        ##################
+#################################################################
+
 
 def draw_arc(percent):
-    # Draw at high resolution for antialiasing
     img = Image.new("RGBA", (SIZE, SIZE), BG_COLOR)
     draw = ImageDraw.Draw(img)
 
-    bbox = [
-        CENTER - RADIUS,
-        CENTER - RADIUS,
-        CENTER + RADIUS,
-        CENTER + RADIUS
-    ]
+    bbox = [CENTER - RADIUS, CENTER - RADIUS, CENTER + RADIUS, CENTER + RADIUS]
 
+    # Compute angles in USER space
+    fill_user = (ARC_START_ANGLE - (percent / 100.0) * ANGLE_RANGE) % 360
 
+    # Convert ONLY when drawing
+    start_pil = user_to_pil(ARC_START_ANGLE)
+    stop_pil = user_to_pil(ARC_STOP_ANGLE)
+    fill_pil = user_to_pil(fill_user)
 
-    # Draw full background arc (from START to END, clockwise)
-    draw.arc(bbox, START_ANGLE, END_ANGLE, fill=EMPTY_COLOR, width=INTERNAL_THICKNESS)
+    # Background arc
+    draw.arc(bbox, start_pil, stop_pil, fill=EMPTY_COLOR, width=INTERNAL_THICKNESS)
 
-    # Calculate filled angle for clockwise fill
-    fill_angle = (START_ANGLE + (percent / 100.0) * ANGLE_RANGE) % 360
+    # Filled arc
+    draw.arc(bbox, start_pil, fill_pil, fill=ARC_COLOR, width=INTERNAL_THICKNESS)
 
-    # Draw filled arc
-    draw.arc(bbox, START_ANGLE, fill_angle, fill=ARC_COLOR, width=INTERNAL_THICKNESS)
-
-    # Draw rounded ends (caps) for the filled arc
-    import math
-    # Calculate start and end points
-
-    def polar_to_cartesian(center, radius, angle_deg):
-        angle_rad = math.radians(angle_deg)
-        x = center + radius * math.cos(angle_rad)
-        y = center + radius * math.sin(angle_rad)
-        return (x, y)
-
-
-    # Use the midpoint of the arc's thickness for cap centers
+    # Caps
     track_radius = RADIUS - (INTERNAL_THICKNESS / 2)
-    start_xy = polar_to_cartesian(CENTER, track_radius, START_ANGLE)
-    end_xy = polar_to_cartesian(CENTER, track_radius, fill_angle)
 
-    # Add rounded cap to the end of the gray (unfilled) arc FIRST (at END_ANGLE)
-    gray_cap_radius = INTERNAL_THICKNESS // 2
-    gray_end_xy = polar_to_cartesian(CENTER, track_radius, END_ANGLE)
-    bbox_gray_cap = [
-        gray_end_xy[0] - gray_cap_radius,
-        gray_end_xy[1] - gray_cap_radius,
-        gray_end_xy[0] + gray_cap_radius,
-        gray_end_xy[1] + gray_cap_radius
-    ]
-    draw.ellipse(bbox_gray_cap, fill=EMPTY_COLOR)
+    start_xy = polar_to_cartesian(CENTER, track_radius, ARC_START_ANGLE)
+    end_xy = polar_to_cartesian(CENTER, track_radius, fill_user)
+    gray_end_xy = polar_to_cartesian(CENTER, track_radius, ARC_STOP_ANGLE)
 
-    # Now draw colored arc caps so they overwrite if needed
     cap_radius = INTERNAL_THICKNESS // 2
+
+    # Gray end cap
+    draw.ellipse(
+        [
+            gray_end_xy[0] - cap_radius,
+            gray_end_xy[1] - cap_radius,
+            gray_end_xy[0] + cap_radius,
+            gray_end_xy[1] + cap_radius,
+        ],
+        fill=EMPTY_COLOR,
+    )
+
+    # Colored caps
     for xy in [start_xy, end_xy]:
-        bbox_cap = [
-            xy[0] - cap_radius,
-            xy[1] - cap_radius,
-            xy[0] + cap_radius,
-            xy[1] + cap_radius
-        ]
-        draw.ellipse(bbox_cap, fill=ARC_COLOR)
+        draw.ellipse(
+            [
+                xy[0] - cap_radius,
+                xy[1] - cap_radius,
+                xy[0] + cap_radius,
+                xy[1] + cap_radius,
+            ],
+            fill=ARC_COLOR,
+        )
+
+    # Downscale
+    return img.resize((DISPLAY_SIZE, DISPLAY_SIZE), Image.LANCZOS)
 
 
-    # Downscale to display size only
-    img_display = img.resize((DISPLAY_SIZE, DISPLAY_SIZE), resample=Image.LANCZOS)
-    return img_display
+#################################################################
+##################      IMAGE GENERATION       ##################
+#################################################################
 
-
-# Generate 0–100%, in increments of 5
 for i in range(0, 101, TICK_STEP):
-    img_display = draw_arc(i)
-    img_display.save(f"out/soc_{i:03d}.png")
+    img = draw_arc(i)
+    img.save(f"out/soc_{i:03d}.png")
 
 print("Done.")
