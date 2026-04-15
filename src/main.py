@@ -8,11 +8,11 @@ DISPLAY_SIZE     = 200
 MARGIN           = 20
 SCALE            = 4
 ARC_THICKNESS    = 15
-ARC_START_ANGLE  = 270  # your system
-ARC_STOP_ANGLE   = 90  # your system
-ARC_COLOR        = (0, 0, 255)
-ARC_BG_COLOR     = (0, 100, 100)
-TICK_STEP        = 2
+ARC_START_ANGLE  = 270
+ARC_STOP_ANGLE   = 90
+ARC_COLOR        = (0, 0, 255) # Red, Green, Blue
+ARC_BG_COLOR     = (0, 100, 100) # Red, Green, Blue
+TICK_STEP        = 2 # Step size. Example: 5 will produce 20 pngs, 2 will produce 50 pngs
 
 
 #################################################################
