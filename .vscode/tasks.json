@@ -11,7 +11,7 @@
         {
             "label": "delete-pngs",
             "type": "shell",
-            "command": "Remove-Item -Force -Path img/*.png",
+            "command": "Remove-Item -Force -Path out/*.png",
             "presentation": {
                 "reveal": "always"
             },

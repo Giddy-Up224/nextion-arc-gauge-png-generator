@@ -97,7 +97,7 @@ def draw_arc(percent):
 # Generate 0–100%, in increments of 5
 for i in range(0, 101, 5):
     img_hr, img_display = draw_arc(i)
-    img_hr.save(f"img/soc_{i:03d}_hr.png")
-    img_display.save(f"img/soc_{i:03d}.png")
+    img_hr.save(f"out/soc_{i:03d}_hr.png")
+    img_display.save(f"out/soc_{i:03d}.png")
 
 print("Done.")
