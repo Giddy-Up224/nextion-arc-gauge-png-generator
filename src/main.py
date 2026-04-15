@@ -7,8 +7,8 @@ DISPLAY_SIZE = 200
 MARGIN = 20
 SCALE = 4   # supersampling factor for smoothness. Higher numbers = smoother
 ARC_THICKNESS = 15
-ARC_START_ANGLE = 45
-ARC_STOP_ANGLE  = 90
+ARC_START_ANGLE = 300
+ARC_STOP_ANGLE  = 60
 
 
 
@@ -28,11 +28,12 @@ INTERNAL_THICKNESS = ARC_THICKNESS * SCALE
 
 
 # --- Angle mapping (clock face to PIL, counterclockwise fill) ---
-def clock_to_pil(angle):
+def user_to_pil(angle):
     return (90 - angle) % 360
 
-START_ANGLE = clock_to_pil(ARC_STOP_ANGLE)
-END_ANGLE = clock_to_pil(ARC_START_ANGLE)
+START_ANGLE = user_to_pil(ARC_START_ANGLE)
+END_ANGLE = user_to_pil(ARC_STOP_ANGLE)
+
 # For clockwise fill, range is (END - START) % 360
 ANGLE_RANGE = (END_ANGLE - START_ANGLE) % 360
 
