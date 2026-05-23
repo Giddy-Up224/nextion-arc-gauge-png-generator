@@ -30,12 +30,9 @@ import math
 
 # img.save('test/test.png')
 
-def clock_to_pil_rotation(angle):
-    return (angle - 90) % 360
 
 class PositionAndSize:
     def __init__(self, canvas_size: list, arc_diameter: int, x_offset=0, y_offset=0):
-        self.rotation = 0
         self.x_offset = x_offset
         self.y_offset = y_offset
         self.left_margin = ((canvas_size[0] - arc_diameter) / 2) + self.x_offset
@@ -49,14 +46,6 @@ class PositionAndSize:
             self.bottom_margin
         ]
 
-    def set_zero_ref_point(self, new_ref: int):
-        """
-        Sets arc start reference point (0) relative to absolute 0 (12:00)
-        Absolute 0 is 12:00 position, absolute 90 is 3:00
-        Example: set_zero_ref_point(270) sets the arc's 0 point to 9:00 position
-        """
-        self.rotation = clock_to_pil_rotation(new_ref)
-
 
 class ArcGenerator:
     def __init__(self):
@@ -66,23 +55,26 @@ class ArcGenerator:
         self.canvas_bg_color = (0, 0, 0, 0) # no background color
         self._arc_color      = (50, 50, 50)
         self.arc_diameter    = 180
-        self.start_angle     = 0
-        self.end_angle       = 125
+        self.start_angle     = 270
+        self.end_angle       = 90
         self.arc_width       = 10
-        
-    def _set_arc_start_angle(self, angle: int):
-        self.pos_n_size.set_zero_ref_point(angle)
 
-    def arc_color(self, red, green, blue):
+    def set_arc_color(self, red, green, blue):
         self._arc_color = (red, green, blue)
+
+    
+    def clock_to_pil_rotation(self, angle):
+        return (angle - 90) % 360
 
     def create(self):
         self.canvas     = Image.new('RGBA', self.canvas_size, self.canvas_bg_color)
         self.draw       = ImageDraw.Draw(self.canvas)
         self.pos_n_size = PositionAndSize(self.canvas_size, self.arc_diameter)
-        self._end_angle = clock_to_pil_rotation(self.end_angle)
-        self._set_arc_start_angle(self.start_angle)
-        self.draw.arc(self.pos_n_size.coords, self.start_angle, self._end_angle, self._arc_color, self.arc_width)
+        self._start_angle = self.clock_to_pil_rotation(self.start_angle)
+        print(f"Start angle (user): {self.start_angle}, PIL: {self._start_angle}")
+        self._end_angle = self.clock_to_pil_rotation(self.end_angle)
+        print(f"End angle (user): {self.end_angle}, PIL: {self._end_angle}")
+        self.draw.arc(self.pos_n_size.coords, self._start_angle, self._end_angle, self._arc_color, self.arc_width)
 
     def save(self, filepath: str):
         self.canvas.save(filepath)
