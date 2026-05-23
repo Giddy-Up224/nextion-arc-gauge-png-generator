@@ -52,12 +52,13 @@ class ArcGenerator:
         self.canvas_width    = 200
         self.canvas_height   = 200
         self.canvas_size     = [self.canvas_width, self.canvas_height]
-        self.canvas_bg_color = (0, 0, 0, 0) # no background color
+        self.opacity         = 0
+        self.canvas_bg_color = (0, 0, 0)
         self._arc_color      = (50, 50, 50)
         self.arc_diameter    = 180
         self.start_angle     = 270
         self.end_angle       = 90
-        self.arc_width       = 10
+        self.arc_thickness   = 10
 
     def set_arc_color(self, red, green, blue):
         self._arc_color = (red, green, blue)
@@ -67,20 +68,23 @@ class ArcGenerator:
         return (angle - 90) % 360
 
     def create(self):
-        self.canvas     = Image.new('RGBA', self.canvas_size, self.canvas_bg_color)
+        self._cvs_color      = (*self.canvas_bg_color, self.opacity)
+        self.canvas     = Image.new('RGBA', self.canvas_size, self._cvs_color)
         self.draw       = ImageDraw.Draw(self.canvas)
         self.pos_n_size = PositionAndSize(self.canvas_size, self.arc_diameter)
         self._start_angle = self.clock_to_pil_rotation(self.start_angle)
         print(f"Start angle (user): {self.start_angle}, PIL: {self._start_angle}")
         self._end_angle = self.clock_to_pil_rotation(self.end_angle)
         print(f"End angle (user): {self.end_angle}, PIL: {self._end_angle}")
-        self.draw.arc(self.pos_n_size.coords, self._start_angle, self._end_angle, self._arc_color, self.arc_width)
+        self.draw.arc(self.pos_n_size.coords, self._start_angle, self._end_angle, self._arc_color, self.arc_thickness)
 
     def save(self, filepath: str):
         self.canvas.save(filepath)
 
 def main():
     arc = ArcGenerator()
+    arc.canvas_bg_color = (255, 255, 255)
+    arc.opacity = 50
     arc.create()
     arc.save('test/test.png')
 
