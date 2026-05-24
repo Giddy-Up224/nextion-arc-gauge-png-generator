@@ -1,6 +1,17 @@
 from PIL import Image, ImageDraw
 import math
 
+# Next steps:
+# - Add another arc on top for the gauge
+# - Add end point for the gauge arc
+# - Add rounded ends to the arcs
+# - Allow setting colors for both arcs
+# - Allow setting arc widths independently
+# - Add PySide6 UI
+#   - Provide controls for outputting arcs for every n angle
+#   - Allow providing a gradient of colors for the arcs
+#   - Allow gradually changing the color of the arc based on the value
+#     Example: 0 = red, 25 = red/yellow, 50 = yellow, 75 = yellow/green, 100 = green
 
 class PositionAndSize:
     def __init__(self, canvas_size: list, arc_diameter: int, x_offset=0, y_offset=0):
