@@ -1,35 +1,6 @@
 from PIL import Image, ImageDraw
 import math
 
-# canvas_width = 200
-# canvas_height = 200
-# canvas_size = [canvas_width, canvas_height]
-# canvas_color = (0, 0, 0, 0)
-
-# img = Image.new('RGBA', canvas_size, canvas_color)
-# draw = ImageDraw.Draw(img)
-
-
-# arc_color = (50, 50, 200)
-
-# arc_diam = 180
-# left   = ((canvas_width - arc_diam) / 2)
-# top    = ((canvas_height - arc_diam) / 2)
-# right  = canvas_width - left
-# bottom = canvas_height - top
-# # coords = [left, top, right, bottom]
-# coords = [left, top, right, bottom]
-
-# def set_rotation_ref(new_ref):
-#     return clock_to_pil_rotation()
-
-# start = clock_to_pil_rotation(0)
-# stop = clock_to_pil_rotation(270)
-
-# draw.arc(coords, start, stop, arc_color, 5)
-
-# img.save('test/test.png')
-
 
 class PositionAndSize:
     def __init__(self, canvas_size: list, arc_diameter: int, x_offset=0, y_offset=0):
