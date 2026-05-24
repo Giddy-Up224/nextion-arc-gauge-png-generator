@@ -60,7 +60,6 @@ class ArcGenerator:
     def __init__(self):
         self.canvas_width    = 200
         self.canvas_height   = 200
-        self.canvas_size     = [self.canvas_width, self.canvas_height]
         self.opacity         = 0
         self.canvas_bg_color = (0, 0, 0)
         self._arc_color      = (50, 50, 50)
@@ -79,6 +78,7 @@ class ArcGenerator:
         return (angle - 90) % 360
 
     def create(self):
+        self.canvas_size     = [self.canvas_width, self.canvas_height]
         self._cvs_color = (*self.canvas_bg_color, (255 - self.opacity))
         self.canvas     = Image.new('RGBA', self.canvas_size, self._cvs_color)
         self.draw       = ImageDraw.Draw(self.canvas)
@@ -97,12 +97,15 @@ class ArcGenerator:
 
 def main():
     arc = ArcGenerator()
+    arc.canvas_width = 200
+    arc.canvas_height = 200
     arc.canvas_bg_color = (255, 255, 255)
     arc.opacity = 255
-    arc.start_angle = 0
-    arc.end_angle = 359
-    arc.vert_offset = 0
+    arc.start_angle = 235
+    arc.end_angle = 125
+    arc.vert_offset = 6
     arc.horiz_offset = 0
+    arc.set_arc_color(255, 255, 255)
     arc.create()
     arc.save('test/test.png')
 
