@@ -44,7 +44,7 @@ class ArcGenerator:
         self.smoothing_scale = 6 # for eliminating pixelation
         self.canvas_width    = 200
         self.canvas_height   = 200
-        self.opacity         = 0
+        self.transparency         = 0
         self.canvas_bg_color = (0, 0, 0)
         self._arc_color      = (50, 50, 50)
         self.arc_diameter    = 180
@@ -66,7 +66,7 @@ class ArcGenerator:
 
     def create(self):
         self._canvas_size = [self.upscale(self.canvas_width), self.upscale(self.canvas_height)]
-        self._cvs_color = (*self.canvas_bg_color, (255 - self.opacity))
+        self._cvs_color = (*self.canvas_bg_color, (255 - self.transparency))
         self.canvas     = Image.new('RGBA', self._canvas_size, self._cvs_color)
         self.draw       = ImageDraw.Draw(self.canvas)
         self.pos_n_size = PositionAndSize(self._canvas_size, self.upscale(self.arc_diameter))
@@ -86,15 +86,16 @@ class ArcGenerator:
 
 def main():
     arc = ArcGenerator()
-    arc.canvas_width = 200
-    arc.canvas_height = 200
-    arc.canvas_bg_color = (255, 255, 255)
-    arc.opacity = 255
-    arc.start_angle = 235
-    arc.end_angle = 125
-    arc.vert_offset = 6
-    arc.horiz_offset = 0
-    arc.set_arc_color(255, 255, 255)
+    arc.canvas_width    = 200
+    arc.canvas_height   = 200
+    arc.canvas_bg_color = (0, 0, 0)
+    arc.transparency    = 255
+    arc.start_angle     = 235
+    arc.end_angle       = 125
+    arc.arc_thickness   = 25
+    arc.vert_offset     = 6
+    arc.horiz_offset    = 0
+    arc.set_arc_color(255, 201, 78)
     arc.create()
     arc.save('test/test.png')
 
