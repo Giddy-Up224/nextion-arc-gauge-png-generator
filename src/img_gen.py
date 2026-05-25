@@ -53,6 +53,7 @@ class ArcGenerator:
         self.arc_thickness   = 10
         self.vert_offset     = 0
         self.horiz_offset    = 0
+        self.center          = 0 # TODO: calculate based on canvas size and offsets
 
     def set_arc_color(self, red, green, blue):
         self._arc_color = (red, green, blue)
@@ -63,6 +64,14 @@ class ArcGenerator:
     
     def upscale(self, value):
         return value * self.smoothing_scale
+    
+    def polar_to_cartesian(self, radius, angle_user):
+        angle_math = self.clock_to_pil_rotation(angle_user)
+        angle_rad = math.radians(angle_math)
+
+        x = self.center + radius * math.cos(angle_rad)
+        y = self.center + radius * math.sin(angle_rad)
+        return (x, y)
 
     def create(self):
         self._canvas_size = [self.upscale(self.canvas_width), self.upscale(self.canvas_height)]
