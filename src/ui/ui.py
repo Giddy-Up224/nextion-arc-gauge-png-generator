@@ -1,20 +1,22 @@
 from PySide6.QtCore import Qt, Slot, QIODevice
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox, QLabel
-from PySide6.QtWidgets import QTabWidget, QTextEdit, QGridLayout, QButtonGroup, QLineEdit, QGroupBox
+from PySide6.QtWidgets import QTabWidget, QTextEdit, QGridLayout, QButtonGroup, QLineEdit, QGroupBox, QColorDialog, QFileDialog
+from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
+from PySide6.QtGui import QIcon
         
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
-        self.setWindowTitle("My Application")
-
+        self.setWindowTitle("Arc Generator")
+        self.setWindowIcon(QIcon('img/R.png'))
+        self.statusBar().showMessage('Have fun!')
         # Create the main widget and set it as the central widget
-        main_widget = QWidget()
-        self.setCentralWidget(main_widget)
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
 
         # Create a vertical layout for the main widget
         main_layout = QVBoxLayout()
-        main_widget.setLayout(main_layout)
+        central_widget.setLayout(main_layout)
 
         # Create a tab widget and add it to the main layout
         self.tab_widget = QTabWidget()
