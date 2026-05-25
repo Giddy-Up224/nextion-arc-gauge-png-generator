@@ -113,12 +113,12 @@ class ArcGenerator:
 
 def main():
     arc = ArcGenerator()
-    arc.canvas_width    = 1000
-    arc.canvas_height   = 1000
+    arc.canvas_width    = 500
+    arc.canvas_height   = 500
     arc.canvas_bg_color = (0, 0, 0)
-    # arc.endcap_color    = (255, 201, 78)
+    arc.endcap_color    = (255, 201, 78)
     # arc.use_endcaps     = False
-    arc.arc_diameter    = 800
+    arc.arc_diameter    = 475
     arc.transparency    = 255
     arc.start_angle     = 270
     arc.end_angle       = 90
