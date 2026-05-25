@@ -12,6 +12,7 @@ import math
 #   - Allow providing a gradient of colors for the arcs
 #   - Allow gradually changing the color of the arc based on the value
 #     Example: 0 = red, 25 = red/yellow, 50 = yellow, 75 = yellow/green, 100 = green
+#   - Use color picker
 
 class PositionAndSize:
     def __init__(self, canvas_size: list, arc_diameter: int, x_offset=0, y_offset=0):
@@ -40,6 +41,7 @@ class PositionAndSize:
 
 class ArcGenerator:
     def __init__(self):
+        self.smoothing_scale = 6 # for eliminating pixelation
         self.canvas_width    = 200
         self.canvas_height   = 200
         self.opacity         = 0
@@ -58,21 +60,26 @@ class ArcGenerator:
     
     def clock_to_pil_rotation(self, angle):
         return (angle - 90) % 360
+    
+    def upscale(self, value):
+        return value * self.smoothing_scale
 
     def create(self):
-        self.canvas_size     = [self.canvas_width, self.canvas_height]
+        self._canvas_size = [self.upscale(self.canvas_width), self.upscale(self.canvas_height)]
         self._cvs_color = (*self.canvas_bg_color, (255 - self.opacity))
-        self.canvas     = Image.new('RGBA', self.canvas_size, self._cvs_color)
+        self.canvas     = Image.new('RGBA', self._canvas_size, self._cvs_color)
         self.draw       = ImageDraw.Draw(self.canvas)
-        self.pos_n_size = PositionAndSize(self.canvas_size, self.arc_diameter)
-        self.pos_n_size.x_offset = self.horiz_offset
-        self.pos_n_size.y_offset = self.vert_offset
+        self.pos_n_size = PositionAndSize(self._canvas_size, self.upscale(self.arc_diameter))
+        self.pos_n_size.x_offset = self.upscale(self.horiz_offset)
+        self.pos_n_size.y_offset = self.upscale(self.vert_offset)
         self.pos_n_size.update()
         self._start_angle = self.clock_to_pil_rotation(self.start_angle)
         print(f"Start angle (user): {self.start_angle}, PIL: {self._start_angle}")
         self._end_angle = self.clock_to_pil_rotation(self.end_angle)
         print(f"End angle (user): {self.end_angle}, PIL: {self._end_angle}")
-        self.draw.arc(self.pos_n_size.coords, self._start_angle, self._end_angle, self._arc_color, self.arc_thickness)
+        self.draw.arc(self.pos_n_size.coords, self._start_angle, self._end_angle, self._arc_color, self.upscale(self.arc_thickness))
+        # Downscale
+        self.canvas = self.canvas.resize((self.canvas_width, self.canvas_height), Image.LANCZOS)
 
     def save(self, filepath: str):
         self.canvas.save(filepath)
