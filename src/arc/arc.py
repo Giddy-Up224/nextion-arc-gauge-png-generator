@@ -3,7 +3,8 @@ import math
 
 # Next steps:
 # - Add another arc on top for the gauge
-# - Add end point for the gauge arc
+# - Allow changing the color of the endcaps independently of the arc color
+# - Make the endcaps optional
 # - Add rounded ends to the arcs
 # - Allow setting colors for both arcs
 # - Allow setting arc widths independently
