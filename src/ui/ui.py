@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QHBoxLayout, QV
 from PySide6.QtWidgets import QTabWidget, QTextEdit, QGridLayout, QButtonGroup, QLineEdit, QGroupBox, QColorDialog, QFileDialog
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
 from PySide6.QtGui import QIcon, QPixmap
+from .controls import Controls
         
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -12,11 +13,17 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage('Have fun!')
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        vbox = QVBoxLayout()
-        central_widget.setLayout(vbox)
+        hbox = QHBoxLayout()
+        central_widget.setLayout(hbox)
         self.img_viewer = QGraphicsView()
-        vbox.addWidget(self.img_viewer)
+        hbox.addWidget(self.img_viewer)
         self.display_image('test/test.png')
+        vbox = QHBoxLayout()
+        hbox.addLayout(vbox)
+        # Controls panel
+        self.controls = Controls()
+        vbox.addWidget(self.controls)
+
 
 
     def display_image(self, pil_image):
@@ -26,3 +33,5 @@ class MainWindow(QMainWindow):
         scene = QGraphicsScene()
         scene.addPixmap(pixmap)
         self.img_viewer.setScene(scene)
+
+    
