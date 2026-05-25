@@ -54,7 +54,8 @@ class ArcGenerator:
         self.arc_thickness   = 10
         self.vert_offset     = 0
         self.horiz_offset    = 0
-        self.x_center          = 300 # TODO: calculate based on canvas size and offsets
+        self.use_endcaps     = True
+        self.endcap_color    = self._arc_color
 
     def set_arc_color(self, red, green, blue):
         self._arc_color = (red, green, blue)
@@ -91,18 +92,19 @@ class ArcGenerator:
         print(f"End angle (user)  : {self.end_angle}, PIL: {self._end_angle}")
         self.draw.arc(self.pos_n_size.coords, self._start_angle, self._end_angle, self._arc_color, self.upscale(self.arc_thickness))
         # Add endcap
-        start_xy = self.polar_to_cartesian(235)
-        end_xy = self.polar_to_cartesian(125)
-        for xy in [start_xy, end_xy]:
-            self.draw.ellipse(
-                [
-                    self.upscale(xy[0] - (self.arc_thickness / 2)),
-                    self.upscale(xy[1] - (self.arc_thickness / 2)),
-                    self.upscale(xy[0] + (self.arc_thickness / 2)),
-                    self.upscale(xy[1] + (self.arc_thickness / 2))
-                ],
-                self._arc_color
-            )
+        if self.use_endcaps:
+            start_xy = self.polar_to_cartesian(235)
+            end_xy = self.polar_to_cartesian(125)
+            for xy in [start_xy, end_xy]:
+                self.draw.ellipse(
+                    [
+                        self.upscale(xy[0] - (self.arc_thickness / 2)),
+                        self.upscale(xy[1] - (self.arc_thickness / 2)),
+                        self.upscale(xy[0] + (self.arc_thickness / 2)),
+                        self.upscale(xy[1] + (self.arc_thickness / 2))
+                    ],
+                    self.endcap_color
+                )
         # Downscale
         self.canvas = self.canvas.resize((self.canvas_width, self.canvas_height), Image.LANCZOS)
 
@@ -114,6 +116,8 @@ def main():
     arc.canvas_width    = 400
     arc.canvas_height   = 400
     arc.canvas_bg_color = (0, 0, 0)
+    # arc.endcap_color    = (255, 201, 78)
+    # arc.use_endcaps     = False
     arc.arc_diameter    = 375
     arc.transparency    = 255
     arc.start_angle     = 235
