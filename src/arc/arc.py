@@ -116,7 +116,7 @@ def main():
     arc.canvas_width    = 500
     arc.canvas_height   = 500
     arc.canvas_bg_color = (0, 0, 0)
-    arc.endcap_color    = (255, 201, 78)
+    arc.endcap_color    = (255, 201, 78) # type: ignore[attr-defined]
     # arc.use_endcaps     = False
     arc.arc_diameter    = 475
     arc.transparency    = 255
