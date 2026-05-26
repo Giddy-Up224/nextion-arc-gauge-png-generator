@@ -15,6 +15,7 @@ class ColorButton(QPushButton):
         self.color_btn_swatch.setFixedSize(48, 12)
         btn_layout.addWidget(self.color_btn_swatch)
         self.update_color(self.color)
+        self.setFixedSize(70, 25)
         self.clicked.connect(self.open_color_picker)
 
     def update_color(self, color):
@@ -30,12 +31,16 @@ class ColorButton(QPushButton):
             self.color = color
             self.update_color(self.color)
 
-
-class Controls(QGroupBox):
-    def __init__(self):
+class ArcControls(QGroupBox):
+    def __init__(self, title: str):
         super().__init__()
-        self.setTitle('Arc Generator')
+        self.setTitle(title)
         layout = QGridLayout(self)
-        # Color button
-        self.color_btn = ColorButton(QColor(Qt.red)) # type: ignore[attr-defined]
-        layout.addWidget(self.color_btn, 0, 0)
+        self.bg_color = QLabel('Arc Color:')
+        layout.addWidget(self.bg_color, 0, 0)
+        self.bg_color_btn = ColorButton(QColor('#555555'))
+        layout.addWidget(self.bg_color_btn, 0, 1)
+        self.endcap_color = QLabel('Endcap Color:')
+        layout.addWidget(self.endcap_color, 1, 0)
+        self.endcap_color_btn = ColorButton(QColor('#555555'))
+        layout.addWidget(self.endcap_color_btn, 1, 1)

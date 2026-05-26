@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QHBoxLayout, QV
 from PySide6.QtWidgets import QTabWidget, QTextEdit, QGridLayout, QButtonGroup, QLineEdit, QGroupBox, QColorDialog, QFileDialog
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
 from PySide6.QtGui import QIcon, QPixmap
-from .controls import Controls
+from .controls import ArcControls
         
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -18,11 +18,10 @@ class MainWindow(QMainWindow):
         self.img_viewer = QGraphicsView()
         hbox.addWidget(self.img_viewer)
         self.display_image('test/test.png')
-        vbox = QHBoxLayout()
+        vbox = QVBoxLayout()
+        self.bg_ctls = ArcControls('Background Arc')
         hbox.addLayout(vbox)
-        # Controls panel
-        self.controls = Controls()
-        vbox.addWidget(self.controls)
+        vbox.addWidget(self.bg_ctls)
 
 
 
