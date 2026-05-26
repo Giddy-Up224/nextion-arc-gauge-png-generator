@@ -11,7 +11,7 @@ class FolderPath(QGroupBox):
         self.setTitle('File')
         layout = QGridLayout(self)
         self.filepath_lbl = QLabel('File:')
-        self.filepath_fld = QLineEdit()
+        self.filepath_fld = QLineEdit(text=path)
         self.filepath_fld.setFixedWidth(200)
         self.file_browse_btn = QPushButton()
         self.file_browse_btn.setText('Browse...')
