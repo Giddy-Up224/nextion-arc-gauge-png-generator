@@ -15,13 +15,13 @@ class FolderPath(QGroupBox):
         layout = QGridLayout(self)
         self.filepath_lbl = QLabel('File:')
         self.filepath_fld = QLineEdit(text=path)
-        self.filepath_fld.setFixedWidth(200)
+        self.filepath_fld.setFixedWidth(500)
         self.file_browse_btn = QPushButton()
         self.file_browse_btn.setText('Browse...')
         self.file_browse_btn.clicked.connect(self.browse_folder)
-        layout.addWidget(self.file_browse_btn, 0, 1)
-        layout.addWidget(self.filepath_lbl,    1, 0)
-        layout.addWidget(self.filepath_fld,    1, 1)
+        layout.addWidget(self.filepath_lbl,    0, 0)
+        layout.addWidget(self.filepath_fld,    0, 1)
+        layout.addWidget(self.file_browse_btn, 0, 2)
 
     def browse_folder(self):
         path = QFileDialog.getExistingDirectory(self, 'Choose Destination Folder', self.path)
