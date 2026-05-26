@@ -2,7 +2,7 @@ from PySide6.QtCore import Qt, Slot, QIODevice
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox, QLabel
 from PySide6.QtWidgets import QTabWidget, QTextEdit, QGridLayout, QButtonGroup, QLineEdit, QGroupBox, QColorDialog, QFileDialog
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtGui import QIcon, QPixmap, QColor
 from .controls import ArcControls
         
 class MainWindow(QMainWindow):
@@ -19,9 +19,17 @@ class MainWindow(QMainWindow):
         hbox.addWidget(self.img_viewer)
         self.display_image('test/test.png')
         vbox = QVBoxLayout()
-        self.bg_ctls = ArcControls('Background Arc')
         hbox.addLayout(vbox)
+        # Background arc
+        self.bg_ctls = ArcControls('Background Arc')
+        self.bg_ctls.btn_color.update_color('#75787B')
+        self.bg_ctls.endcap_btn_color.update_color('#75787B')
         vbox.addWidget(self.bg_ctls)
+        # Foreground arc
+        self.fg_ctls = ArcControls('Foreground Arc')
+        self.fg_ctls.btn_color.update_color('#FFC94D')
+        self.fg_ctls.endcap_btn_color.update_color('#FFC94D')
+        vbox.addWidget(self.fg_ctls)
 
 
 
