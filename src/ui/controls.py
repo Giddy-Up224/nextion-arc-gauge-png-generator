@@ -2,10 +2,13 @@ from PySide6.QtCore import Qt, Slot, QIODevice
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox, QLabel
 from PySide6.QtWidgets import QTabWidget, QTextEdit, QGridLayout, QButtonGroup, QLineEdit, QGroupBox, QColorDialog, QFileDialog
 from PySide6.QtGui import QColor
+import os
 
+def get_current_dir():
+        return os.getcwd().replace('\\', '/') + '/'
 
 class FolderPath(QGroupBox):
-    def __init__(self, path='src/preview'):
+    def __init__(self, path=f'{get_current_dir()}src/preview'):
         super().__init__()
         self.path = path
         self.setTitle('File')
