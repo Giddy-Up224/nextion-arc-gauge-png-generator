@@ -23,13 +23,16 @@ class ColorButton(QPushButton):
         self.color = color 
         color_name = QColor(self.color).name()
         self.color_btn_swatch.setStyleSheet(f"background-color: {color_name};")
-        print(f"Color: {QColor(self.color).getRgb()}")
 
     def open_color_picker(self):
         color = QColorDialog.getColor(self.color, self, "Select Color")
         if color.isValid():
             self.color = color
             self.update_color(self.color)
+
+    def get_color(self):
+        print(f"type: {type(QColor(self.color).getRgb())}")
+        return QColor(self.color).getRgb()
 
 class ArcControls(QGroupBox):
     def __init__(self, title: str):
@@ -38,9 +41,9 @@ class ArcControls(QGroupBox):
         layout = QGridLayout(self)
         # Background arc color selection
         self.bg_color = QLabel('Arc Color:')
-        self.bg_color_btn = ColorButton(QColor('#555555'))
+        self.bg_color_btn = ColorButton(QColor('#75787B'))
         self.bg_endcap_color = QLabel('Endcap Color:')
-        self.bg_endcap_color_btn = ColorButton(QColor('#555555'))
+        self.bg_endcap_color_btn = ColorButton(QColor('#75787B'))
         layout.addWidget(self.bg_color, 0, 0)
         layout.addWidget(self.bg_color_btn, 0, 1)
         layout.addWidget(self.bg_endcap_color, 1, 0)
