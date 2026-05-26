@@ -4,6 +4,28 @@ from PySide6.QtWidgets import QTabWidget, QTextEdit, QGridLayout, QButtonGroup, 
 from PySide6.QtGui import QColor
 
 
+class FolderPath(QGroupBox):
+    def __init__(self, path='src/preview'):
+        super().__init__()
+        self.path = path
+        self.setTitle('File')
+        layout = QGridLayout(self)
+        self.filepath_lbl = QLabel('File:')
+        self.filepath_fld = QLineEdit()
+        self.filepath_fld.setFixedWidth(200)
+        self.file_browse_btn = QPushButton()
+        self.file_browse_btn.setText('Browse...')
+        self.file_browse_btn.clicked.connect(self.browse_folder)
+        layout.addWidget(self.file_browse_btn, 0, 1)
+        layout.addWidget(self.filepath_lbl,    1, 0)
+        layout.addWidget(self.filepath_fld,    1, 1)
+
+    def browse_folder(self):
+        path = QFileDialog.getExistingDirectory(self, 'Choose Destination Folder', self.path)
+        return path
+
+
+
 class ColorButton(QPushButton):
     def __init__(self, color=QColor('#FFFFFF')):
         super().__init__()

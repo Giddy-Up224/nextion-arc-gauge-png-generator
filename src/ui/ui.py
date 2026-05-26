@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QHBoxLayout, QV
 from PySide6.QtWidgets import QTabWidget, QTextEdit, QGridLayout, QButtonGroup, QLineEdit, QGroupBox, QColorDialog, QFileDialog
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
 from PySide6.QtGui import QIcon, QPixmap, QColor
-from .controls import ArcControls
+from .controls import ArcControls, FolderPath
         
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -20,6 +20,9 @@ class MainWindow(QMainWindow):
         self.display_image('test/test.png')
         vbox = QVBoxLayout()
         hbox.addLayout(vbox)
+        # folder browser
+        self.folder_ctls = FolderPath()
+        vbox.addWidget(self.folder_ctls)
         # Background arc
         self.bg_ctls = ArcControls('Background Arc')
         self.bg_ctls.btn_color.update_color('#75787B')
