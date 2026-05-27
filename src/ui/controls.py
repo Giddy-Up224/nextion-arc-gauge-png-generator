@@ -135,6 +135,6 @@ class ArcCountControls(QGroupBox):
         self.generate_img_btn = QPushButton('Generate Images')
         layout.addWidget(self.increment_val_lbl,    0, 0)
         layout.addWidget(self.increment_val_fld,    0, 1)
+        layout.addWidget(self.generate_img_btn,     0, 2)
         layout.addWidget(self.number_of_images_lbl, 1, 0)
         layout.addWidget(self.number_of_images_fld, 1, 1)
-        layout.addWidget(self.generate_img_btn,     0, 2)
