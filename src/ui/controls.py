@@ -3,18 +3,18 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QHBoxLayout, QV
 from PySide6.QtWidgets import QTabWidget, QTextEdit, QGridLayout, QButtonGroup, QLineEdit, QGroupBox, QColorDialog, QFileDialog
 from PySide6.QtGui import QColor
 import os
+from pathlib import Path
 
-def get_current_dir():
-        return os.getcwd().replace('\\', '/') + '/'
+        
 
 class FolderPath(QGroupBox):
-    def __init__(self, path=f'{get_current_dir()}src/preview'):
+    def __init__(self, path=Path.joinpath(Path(__file__).parents[2], 'output')):
         super().__init__()
-        self.path = path
+        self.output_path = path
         self.setTitle('File')
         layout = QGridLayout(self)
-        self.filepath_lbl = QLabel('File:')
-        self.filepath_fld = QLineEdit(text=path)
+        self.filepath_lbl = QLabel('Output Folder:')
+        self.filepath_fld = QLineEdit(text=str(path))
         self.filepath_fld.setFixedWidth(500)
         self.file_browse_btn = QPushButton()
         self.file_browse_btn.setText('Browse...')
@@ -24,8 +24,19 @@ class FolderPath(QGroupBox):
         layout.addWidget(self.file_browse_btn, 0, 2)
 
     def browse_folder(self):
-        path = QFileDialog.getExistingDirectory(self, 'Choose Destination Folder', self.path)
-        return path
+        if self.ensure_output_folder_exists():
+            self.output_path = QFileDialog.getExistingDirectory(self, 'Choose Destination Folder', str(self.output_path))
+    
+    def ensure_output_folder_exists(self):
+        if not Path(self.output_path).exists:
+            try:
+                Path(self.output_path).mkdir(exist_ok=True)
+                return True
+            except Exception as e:
+                print(f"Exception creating folder! Exception: {e}")
+                return False
+        else:
+            return True
 
 
 
