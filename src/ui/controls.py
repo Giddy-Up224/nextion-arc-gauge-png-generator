@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, Slot, QIODevice
-from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox, QLabel
+from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QCheckBox, QLabel, QSpinBox
 from PySide6.QtWidgets import QTabWidget, QTextEdit, QGridLayout, QButtonGroup, QLineEdit, QGroupBox, QColorDialog, QFileDialog
 from PySide6.QtGui import QColor
 import os
@@ -70,7 +70,7 @@ class ColorButton(QPushButton):
         print(f"type: {type(QColor(self.color).getRgb())}")
         return QColor(self.color).getRgb()
 
-class ArcControls(QGroupBox):
+class ArcDesignControls(QGroupBox):
     def __init__(self, title: str):
         super().__init__()
         self.setTitle(title)
@@ -97,3 +97,14 @@ class ArcControls(QGroupBox):
         layout.addWidget(self.endcap_btn_color, 1, 1)
         layout.addWidget(self.end_angle_lbl,    1, 2)
         layout.addWidget(self.end_angle_fld,    1, 3)
+
+class ArcCountControls(QGroupBox):
+    def __init__(self):
+        super().__init__()
+        layout = QGridLayout(self)
+        self.number_of_images_lbl = QLabel('No. of Images')
+        self.number_of_images_fld = QSpinBox()
+        self.number_of_images_fld.setValue(1)
+        self.number_of_images_fld.setMaximum(500)
+        layout.addWidget(self.number_of_images_lbl, 0, 0)
+        layout.addWidget(self.number_of_images_fld, 0, 1)

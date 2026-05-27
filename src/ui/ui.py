@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QHBoxLayout, QV
 from PySide6.QtWidgets import QTabWidget, QTextEdit, QGridLayout, QButtonGroup, QLineEdit, QGroupBox, QColorDialog, QFileDialog
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
 from PySide6.QtGui import QIcon, QPixmap, QColor
-from .controls import ArcControls, FolderPath
+from .controls import ArcDesignControls, FolderPath, ArcCountControls
         
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -24,15 +24,18 @@ class MainWindow(QMainWindow):
         self.folder_ctls = FolderPath()
         vbox.addWidget(self.folder_ctls)
         # Background arc
-        self.bg_ctls = ArcControls('Background Arc')
+        self.bg_ctls = ArcDesignControls('Background Arc')
         self.bg_ctls.btn_color.update_color('#75787B')
         self.bg_ctls.endcap_btn_color.update_color('#75787B')
         vbox.addWidget(self.bg_ctls)
         # Foreground arc
-        self.fg_ctls = ArcControls('Foreground Arc')
+        self.fg_ctls = ArcDesignControls('Foreground Arc')
         self.fg_ctls.btn_color.update_color('#FFC94D')
         self.fg_ctls.endcap_btn_color.update_color('#FFC94D')
         vbox.addWidget(self.fg_ctls)
+        # Arc Options
+        self.number_ctls = ArcCountControls()
+        vbox.addWidget(self.number_ctls)
 
 
 
