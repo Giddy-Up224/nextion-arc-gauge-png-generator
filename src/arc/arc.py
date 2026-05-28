@@ -77,12 +77,16 @@ class ArcGenerator:
         y = self.y_center + self.arc_radius * math.sin(angle_rad)
         return (x, y)
 
-    def create(self):
+    def create_canvas(self):
         self._canvas_size        = [self.upscale(self.canvas_width), self.upscale(self.canvas_height)]
         self._cvs_color          = (*self.canvas_bg_color, (255 - self.transparency))
         self.canvas              = Image.new('RGBA', self._canvas_size, self._cvs_color)
         self.draw                = ImageDraw.Draw(self.canvas)
         self.pos_n_size          = PositionAndSize(self._canvas_size, self.upscale(self.arc_diameter))
+
+    def draw_arc(self):
+        # TODO: Use center path for arc creation to allow remaining centered
+        # when making the top arc wider than the background arc
         self.pos_n_size.x_offset = self.upscale(self.horiz_offset)
         self.pos_n_size.y_offset = self.upscale(self.vert_offset)
         self.pos_n_size.update()
@@ -90,6 +94,8 @@ class ArcGenerator:
         print(f"Start angle (user): {self.start_angle}, PIL: {self._start_angle}")
         self._end_angle = self.clock_to_pil_rotation(self.end_angle)
         print(f"End angle (user)  : {self.end_angle}, PIL: {self._end_angle}")
+        print(f"Arc color:    {self._arc_color}")
+        print(f"Endcap color: {self.endcap_color}")
         self.draw.arc(self.pos_n_size.coords, self._start_angle, self._end_angle, self._arc_color, self.upscale(self.arc_thickness))
         # Add endcaps
         if self.use_endcaps:
@@ -105,10 +111,10 @@ class ArcGenerator:
                     ],
                     self.endcap_color
                 )
-        # Downscale
-        self.canvas = self.canvas.resize((self.canvas_width, self.canvas_height), Image.LANCZOS) # type: ignore[attr-defined]
 
     def save(self, filepath: str):
+        # Downscale
+        self.canvas = self.canvas.resize((self.canvas_width, self.canvas_height), Image.LANCZOS) # type: ignore[attr-defined]
         self.canvas.save(filepath)
 
 def main():
@@ -116,17 +122,22 @@ def main():
     arc.canvas_width    = 500
     arc.canvas_height   = 500
     arc.canvas_bg_color = (0, 0, 0)
-    arc.endcap_color    = (255, 201, 78) # type: ignore[attr-defined]
+    arc.endcap_color    = (150, 150, 150) # type: ignore[attr-defined]
     # arc.use_endcaps     = False
     arc.arc_diameter    = 475
     arc.transparency    = 255
-    arc.start_angle     = 270
-    arc.end_angle       = 90
+    arc.start_angle     = 235
+    arc.end_angle       = 125
     arc.arc_thickness   = 20
     arc.vert_offset     = 60
     arc.horiz_offset    = 0
+    arc.set_arc_color(150, 150, 150)
+    arc.create_canvas()
+    arc.draw_arc()
+    arc.end_angle       = 90
     arc.set_arc_color(255, 201, 78)
-    arc.create()
+    arc.endcap_color    = (255, 201, 78) # type: ignore[attr-defined]
+    arc.draw_arc()
     arc.save('test/test.png')
 
 if __name__ == '__main__':
