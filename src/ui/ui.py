@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QTabWidget, QTextEdit, QGridLayout, QButtonGroup, 
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsView
 from PySide6.QtGui import QIcon, QPixmap, QColor
 from .controls import ArcDesignControls, FolderPath, ArcCountControls
+from arc import ArcGenerator
         
 class MainWindow(QMainWindow):
     def __init__(self):

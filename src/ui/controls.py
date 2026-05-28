@@ -116,6 +116,7 @@ class ArcDesignControls(QGroupBox):
         layout.addWidget(self.endcap_btn_color, 2, 1)
         layout.addWidget(self.end_angle_lbl,    2, 2)
         layout.addWidget(self.end_angle_fld,    2, 3)
+        # TODO: Add opacity controls
 
 class ArcCountControls(QGroupBox):
     def __init__(self):
@@ -138,3 +139,4 @@ class ArcCountControls(QGroupBox):
         layout.addWidget(self.generate_img_btn,     0, 2)
         layout.addWidget(self.number_of_images_lbl, 1, 0)
         layout.addWidget(self.number_of_images_fld, 1, 1)
+        # TODO: Add offset x and y controls

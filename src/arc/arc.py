@@ -60,10 +60,6 @@ class ArcProperties:
 class ArcGenerator:
     def __init__(self, properties: ArcProperties):
         self.prop = properties
-
-    def set_arc_color(self, red, green, blue):
-        self.prop._arc_color = (red, green, blue)
-
     
     def clock_to_pil_rotation(self, angle):
         return (angle - 90) % 360
