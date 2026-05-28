@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw
 import math
+from dataclasses import dataclass
 
 # Next steps:
 # - Add another arc on top for the gauge
@@ -39,104 +40,92 @@ class PositionAndSize:
             self.bottom_margin
         ]
 
+@dataclass
+class ArcProperties:
+    smoothing_scale:int   = 6
+    canvas_width:   int   = 200
+    canvas_height:  int   = 200
+    canvas_bg_color:tuple = (0, 0, 0, 0)
+    _arc_color:     tuple = (50, 50, 50, 255)
+    arc_diameter:   int   = 180
+    start_angle:    int   = 235
+    end_angle:      int   = 125
+    arc_thickness:  int   = 10
+    vert_offset:    int   = 0
+    horiz_offset:   int   = 0
+    use_endcaps:    bool  = True
+    endcap_color:   tuple = (50, 50, 50, 255)
+
 
 class ArcGenerator:
-    def __init__(self):
-        self.smoothing_scale = 6 # for eliminating pixelation
-        self.canvas_width    = 200
-        self.canvas_height   = 200
-        self.transparency    = 0
-        self.canvas_bg_color = (0, 0, 0)
-        self._arc_color      = (50, 50, 50)
-        self.arc_diameter    = 180
-        self.start_angle     = 270
-        self.end_angle       = 90
-        self.arc_thickness   = 10
-        self.vert_offset     = 0
-        self.horiz_offset    = 0
-        self.use_endcaps     = True
-        self.endcap_color    = self._arc_color
+    def __init__(self, properties: ArcProperties):
+        self.prop = properties
 
     def set_arc_color(self, red, green, blue):
-        self._arc_color = (red, green, blue)
+        self.prop._arc_color = (red, green, blue)
 
     
     def clock_to_pil_rotation(self, angle):
         return (angle - 90) % 360
     
     def upscale(self, value):
-        return value * self.smoothing_scale
+        return value * self.prop.smoothing_scale
     
     def polar_to_cartesian(self, angle_user):
-        self.arc_radius = ((self.arc_diameter / 2) - (self.arc_thickness / 2))
+        self.arc_radius = ((self.prop.arc_diameter / 2) - (self.prop.arc_thickness / 2))
         angle_math = self.clock_to_pil_rotation(angle_user)
         angle_rad = math.radians(angle_math)
-        self.x_center = (self.canvas_width // 2) + self.horiz_offset
-        self.y_center = (self.canvas_height // 2) + self.vert_offset
+        self.x_center = (self.prop.canvas_width // 2) + self.prop.horiz_offset
+        self.y_center = (self.prop.canvas_height // 2) + self.prop.vert_offset
         x = self.x_center + self.arc_radius * math.cos(angle_rad)
         y = self.y_center + self.arc_radius * math.sin(angle_rad)
         return (x, y)
 
     def create_canvas(self):
-        self._canvas_size        = [self.upscale(self.canvas_width), self.upscale(self.canvas_height)]
-        self._cvs_color          = (*self.canvas_bg_color, (255 - self.transparency))
-        self.canvas              = Image.new('RGBA', self._canvas_size, self._cvs_color)
-        self.draw                = ImageDraw.Draw(self.canvas)
-        self.pos_n_size          = PositionAndSize(self._canvas_size, self.upscale(self.arc_diameter))
+        self._canvas_size        = [self.upscale(self.prop.canvas_width), self.upscale(self.prop.canvas_height)]
+        self.canvas              = Image.new('RGBA', self._canvas_size, self.prop.canvas_bg_color)
+        self.draw                = ImageDraw.Draw(self.canvas, 'RGBA')
+        self.pos_n_size          = PositionAndSize(self._canvas_size, self.upscale(self.prop.arc_diameter))
 
     def draw_arc(self):
         # TODO: Use center path for arc creation to allow remaining centered
         # when making the top arc wider than the background arc
-        self.pos_n_size.x_offset = self.upscale(self.horiz_offset)
-        self.pos_n_size.y_offset = self.upscale(self.vert_offset)
+        self.pos_n_size.x_offset = self.upscale(self.prop.horiz_offset)
+        self.pos_n_size.y_offset = self.upscale(self.prop.vert_offset)
         self.pos_n_size.update()
-        self._start_angle = self.clock_to_pil_rotation(self.start_angle)
-        print(f"Start angle (user): {self.start_angle}, PIL: {self._start_angle}")
-        self._end_angle = self.clock_to_pil_rotation(self.end_angle)
-        print(f"End angle (user)  : {self.end_angle}, PIL: {self._end_angle}")
-        print(f"Arc color:    {self._arc_color}")
-        print(f"Endcap color: {self.endcap_color}")
-        self.draw.arc(self.pos_n_size.coords, self._start_angle, self._end_angle, self._arc_color, self.upscale(self.arc_thickness))
+        self._start_angle = self.clock_to_pil_rotation(self.prop.start_angle)
+        print(f"Start angle (user): {self.prop.start_angle}, PIL: {self._start_angle}")
+        self._end_angle = self.clock_to_pil_rotation(self.prop.end_angle)
+        print(f"End angle (user)  : {self.prop.end_angle}, PIL: {self._end_angle}")
+        print(f"Arc color:    {self.prop._arc_color}")
+        print(f"Endcap color: {self.prop.endcap_color}")
+        self.draw.arc(self.pos_n_size.coords, self._start_angle, self._end_angle, self.prop._arc_color, self.upscale(self.prop.arc_thickness))
         # Add endcaps
-        if self.use_endcaps:
-            start_xy = self.polar_to_cartesian(self.start_angle)
-            end_xy = self.polar_to_cartesian(self.end_angle)
+        if self.prop.use_endcaps:
+            start_xy = self.polar_to_cartesian(self.prop.start_angle)
+            end_xy = self.polar_to_cartesian(self.prop.end_angle)
             for xy in [start_xy, end_xy]:
                 self.draw.ellipse(
                     [
-                        self.upscale(xy[0] - (self.arc_thickness / 2)),
-                        self.upscale(xy[1] - (self.arc_thickness / 2)),
-                        self.upscale(xy[0] + (self.arc_thickness / 2)),
-                        self.upscale(xy[1] + (self.arc_thickness / 2))
+                        self.upscale(xy[0] - (self.prop.arc_thickness / 2)),
+                        self.upscale(xy[1] - (self.prop.arc_thickness / 2)),
+                        self.upscale(xy[0] + (self.prop.arc_thickness / 2)),
+                        self.upscale(xy[1] + (self.prop.arc_thickness / 2))
                     ],
-                    self.endcap_color
+                    self.prop.endcap_color
                 )
 
     def save(self, filepath: str):
         # Downscale
-        self.canvas = self.canvas.resize((self.canvas_width, self.canvas_height), Image.LANCZOS) # type: ignore[attr-defined]
+        self.canvas = self.canvas.resize((self.prop.canvas_width, self.prop.canvas_height), Image.LANCZOS) # type: ignore[attr-defined]
         self.canvas.save(filepath)
 
+
+
 def main():
-    arc = ArcGenerator()
-    arc.canvas_width    = 500
-    arc.canvas_height   = 500
-    arc.canvas_bg_color = (0, 0, 0)
-    arc.endcap_color    = (150, 150, 150) # type: ignore[attr-defined]
-    # arc.use_endcaps     = False
-    arc.arc_diameter    = 475
-    arc.transparency    = 255
-    arc.start_angle     = 235
-    arc.end_angle       = 125
-    arc.arc_thickness   = 20
-    arc.vert_offset     = 60
-    arc.horiz_offset    = 0
-    arc.set_arc_color(150, 150, 150)
+    background = ArcProperties()
+    arc = ArcGenerator(background)
     arc.create_canvas()
-    arc.draw_arc()
-    arc.end_angle       = 90
-    arc.set_arc_color(255, 201, 78)
-    arc.endcap_color    = (255, 201, 78) # type: ignore[attr-defined]
     arc.draw_arc()
     arc.save('test/test.png')
 
