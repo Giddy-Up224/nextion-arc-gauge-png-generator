@@ -153,6 +153,16 @@ class ArcRenderer:
             width=thickness,
         )
 
+        if cfg.show_endcaps:
+            for angle in (cfg.start_angle, cfg.end_angle):
+                x, y = self.polar_point(geom.center, geom.radius, angle)
+
+                r = thickness / 2
+                draw.ellipse(
+                    [x - r, y - r, x + r, y + r],
+                    fill=cfg.track_color,
+                )
+
         draw.arc(
             geom.bbox,
             start=start,
