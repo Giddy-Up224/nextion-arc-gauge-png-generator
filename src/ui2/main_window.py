@@ -137,9 +137,14 @@ class ColorButton(QPushButton):
 
     def _open_picker(self) -> None:
         r, g, b, a = self._rgba
-        picked = QColorDialog.getColor(QColor(r, g, b, a), self, "Choose Color")
-        if picked.isValid():
-            self.set_value((picked.red(), picked.green(), picked.blue(), picked.alpha()))
+        dialog = QColorDialog(QColor(r, g, b, a), self)
+        dialog.setWindowTitle("Choose Color")
+        dialog.setOption(QColorDialog.ColorDialogOption.ShowAlphaChannel, True)
+        dialog.setOption(QColorDialog.ColorDialogOption.DontUseNativeDialog, True)
+        if dialog.exec():
+            picked = dialog.currentColor()
+            if picked.isValid():
+                self.set_value((picked.red(), picked.green(), picked.blue(), picked.alpha()))
 
 
 class ArcPreviewView(QGraphicsView):
