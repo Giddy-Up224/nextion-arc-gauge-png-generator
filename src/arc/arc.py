@@ -47,7 +47,7 @@ class ArcProperties:
     canvas_width:   int   = 200
     canvas_height:  int   = 200
     canvas_bg_color:tuple = (0, 0, 0, 0)
-    _arc_color:     tuple = (50, 50, 50, 255)
+    _arc_color:     tuple = (80, 200, 10, 255)
     arc_diameter:   int   = 180
     start_angle:    int   = 235
     end_angle:      int   = 125
@@ -55,7 +55,7 @@ class ArcProperties:
     vert_offset:    int   = 0
     horiz_offset:   int   = 0
     use_endcaps:    bool  = True
-    endcap_color:   tuple = (50, 50, 50, 255)
+    endcap_color:   tuple = (80, 200, 10, 255)
 
 
 class ArcGenerator:
