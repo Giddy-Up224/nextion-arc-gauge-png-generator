@@ -39,10 +39,11 @@ class PositionAndSize:
             self.right_margin,
             self.bottom_margin
         ]
+        # I need to know the size of the canvas so I can position the arc correctly
 
 @dataclass
 class ArcProperties:
-    smoothing_scale:int   = 6
+    smoothing_factor:int   = 6
     canvas_width:   int   = 200
     canvas_height:  int   = 200
     canvas_bg_color:tuple = (0, 0, 0, 0)
@@ -65,7 +66,7 @@ class ArcGenerator:
         return (angle - 90) % 360
     
     def upscale(self, value):
-        return value * self.prop.smoothing_scale
+        return value * self.prop.smoothing_factor
     
     def polar_to_cartesian(self, angle_user):
         self.arc_radius = ((self.prop.arc_diameter / 2) - (self.prop.arc_thickness / 2))
@@ -76,6 +77,21 @@ class ArcGenerator:
         x = self.x_center + self.arc_radius * math.cos(angle_rad)
         y = self.y_center + self.arc_radius * math.sin(angle_rad)
         return (x, y)
+
+    def calc_coords(self):
+        width = (self.prop.canvas_width - self.prop.arc_diameter) / 2
+        height = (self.prop.canvas_height - self.prop.arc_diameter) / 2
+        self.left_margin = width + self.prop.horiz_offset
+        self.top_margin = height + self.prop.vert_offset
+        self.right_margin = (self.prop.canvas_width - width) + self.prop.horiz_offset
+        self.bottom_margin = (self.prop.canvas_height - height) + self.prop.vert_offset
+        
+        self.coords = [
+            self.left_margin,
+            self.top_margin,
+            self.right_margin,
+            self.bottom_margin
+        ]
 
     def create_canvas(self):
         self._canvas_size        = [self.upscale(self.prop.canvas_width), self.upscale(self.prop.canvas_height)]
@@ -108,7 +124,7 @@ class ArcGenerator:
                         self.upscale(xy[0] + (self.prop.arc_thickness / 2)),
                         self.upscale(xy[1] + (self.prop.arc_thickness / 2))
                     ],
-                    self.prop.endcap_color
+                    self.prop.endcap_color # TODO: Allow changing the right-hand dot's color/opacity indepentently from the left
                 )
 
     def save(self, filepath: str):
