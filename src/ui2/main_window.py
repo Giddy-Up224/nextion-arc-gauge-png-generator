@@ -154,6 +154,7 @@ class ArcPreviewView(QGraphicsView):
         self._scene = QGraphicsScene(self)
         self.setScene(self._scene)
         self._pixmap_item = self._scene.addPixmap(QPixmap())
+        self._pixmap_item.setTransformationMode(Qt.TransformationMode.SmoothTransformation)
         self._zoom = 1.0
         self._fit_mode = True
         self._fit_in_progress = False
@@ -508,26 +509,11 @@ class ArcPreviewWindow(QMainWindow):
         )
 
     def _build_preview_config(self, full_cfg: ArcConfig) -> ArcConfig:
-        max_dim = max(full_cfg.canvas_size)
-        scale = 1.0
-        if max_dim > 1024:
-            scale = 1024.0 / float(max_dim)
-
-        if scale >= 1.0 and full_cfg.supersample <= 2:
+        if full_cfg.supersample <= 2:
             return full_cfg
-
-        scaled_canvas = (
-            max(16, int(round(full_cfg.canvas_size[0] * scale))),
-            max(16, int(round(full_cfg.canvas_size[1] * scale))),
-        )
 
         return replace(
             full_cfg,
-            canvas_size=scaled_canvas,
-            arc_diameter=max(1, int(round(full_cfg.arc_diameter * scale))),
-            arc_thickness=max(1, int(round(full_cfg.arc_thickness * scale))),
-            offset_x=int(round(full_cfg.offset_x * scale)),
-            offset_y=int(round(full_cfg.offset_y * scale)),
             supersample=min(full_cfg.supersample, 2),
         )
 
