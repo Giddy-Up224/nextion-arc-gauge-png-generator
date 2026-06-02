@@ -4,4 +4,4 @@ venv/
 .venv/
 __pycache__/
 *.pyc
-dist/*.exe
+**.exe
