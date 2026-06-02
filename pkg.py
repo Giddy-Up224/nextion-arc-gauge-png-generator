@@ -1,3 +1,13 @@
+# Packaging Requirements (project-specific)
+
+# 1. Default entrypoint is src/main.py unless explicitly provided.
+# 2. Image assets are bundled from img/ via PyInstaller --add-data.
+# 3. App icon is expected at img/{PROGRAM_NAME}.ico (if present).
+# 4. Python dependencies are installed from requirements.txt.
+# 5. Default packaging virtual environment folder is instvenv.
+
+# These are intentional defaults for this project's build workflow.
+
 import subprocess
 import shutil
 import os
