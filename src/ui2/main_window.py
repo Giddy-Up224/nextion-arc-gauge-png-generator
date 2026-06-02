@@ -7,7 +7,7 @@ from typing import Optional
 
 from PIL.ImageQt import ImageQt
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, QTimer, Qt, Signal
-from PySide6.QtGui import QBrush, QColor, QIcon, QPainter, QPixmap
+from PySide6.QtGui import QBrush, QColor, QIcon, QPainter, QPixmap, QTransform
 from PySide6.QtWidgets import (
     QCheckBox,
     QColorDialog,
@@ -156,6 +156,7 @@ class ArcPreviewView(QGraphicsView):
         self._zoom = 1.0
         self._fit_mode = True
         self._fit_in_progress = False
+        self._canvas_size = (0, 0)
 
         self.setRenderHints(
             QPainter.RenderHint.Antialiasing
@@ -178,11 +179,29 @@ class ArcPreviewView(QGraphicsView):
 
     def drawBackground(self, painter: QPainter, rect) -> None:  # type: ignore[override]
         painter.fillRect(rect, QColor("#202124"))
-        painter.fillRect(rect, self._checker_brush)
+        if self._canvas_size[0] > 0 and self._canvas_size[1] > 0:
+            painter.fillRect(0, 0, self._canvas_size[0], self._canvas_size[1], self._checker_brush)
 
-    def set_pixmap(self, pixmap: QPixmap) -> None:
+    def set_pixmap(self, pixmap: QPixmap, canvas_size: tuple[int, int] | None = None) -> None:
+        if canvas_size is None:
+            canvas_w = pixmap.width()
+            canvas_h = pixmap.height()
+        else:
+            canvas_w = max(1, int(canvas_size[0]))
+            canvas_h = max(1, int(canvas_size[1]))
+
+        self._canvas_size = (canvas_w, canvas_h)
         self._pixmap_item.setPixmap(pixmap)
-        self._scene.setSceneRect(self._pixmap_item.boundingRect())
+
+        pix_w = max(1, pixmap.width())
+        pix_h = max(1, pixmap.height())
+        self._pixmap_item.setPos(0, 0)
+        self._pixmap_item.setTransformOriginPoint(0, 0)
+        self._pixmap_item.setTransform(
+            QTransform.fromScale(canvas_w / pix_w, canvas_h / pix_h)
+        )
+
+        self._scene.setSceneRect(0, 0, canvas_w, canvas_h)
         if self._fit_mode:
             self.fit_to_window()
         else:
@@ -253,6 +272,7 @@ class ArcPreviewWindow(QMainWindow):
         self._export_in_progress = False
         self._save_in_progress = False
         self._render_meta: dict[int, str] = {}
+        self._render_canvas: dict[int, tuple[int, int]] = {}
 
         self._debounce = QTimer(self)
         self._debounce.setSingleShot(True)
@@ -520,6 +540,7 @@ class ArcPreviewWindow(QMainWindow):
             f"Preview {preview_cfg.canvas_size[0]}x{preview_cfg.canvas_size[1]}"
             f" from {full_cfg.canvas_size[0]}x{full_cfg.canvas_size[1]}"
         )
+        self._render_canvas[self._render_request_id] = full_cfg.canvas_size
         self._render_in_flight = True
         self.status_label.setText("Rendering preview...")
         self.status_label.setStyleSheet("color: #BFC3C9;")
@@ -534,6 +555,7 @@ class ArcPreviewWindow(QMainWindow):
     ) -> None:
         self._render_in_flight = False
         meta = self._render_meta.pop(request_id, "Preview")
+        canvas_size = self._render_canvas.pop(request_id, (image.width, image.height) if image is not None else (0, 0))
 
         if request_id != self._render_request_id:
             if self._pending_render:
@@ -548,7 +570,7 @@ class ArcPreviewWindow(QMainWindow):
             qimage = ImageQt(image)
             pixmap = QPixmap.fromImage(qimage)
             self._latest_pixmap = pixmap
-            self.preview.set_pixmap(pixmap)
+            self.preview.set_pixmap(pixmap, canvas_size)
 
             self.status_label.setText(f"{meta} | {elapsed_ms:.1f} ms")
             self.status_label.setStyleSheet("color: #BFC3C9;")
