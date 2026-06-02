@@ -171,8 +171,10 @@ class ArcRenderer:
     def legacy_cap_center(cfg: ArcConfig, angle_clock: float) -> Tuple[float, float]:
         arc_radius = (cfg.arc_diameter / 2) - (cfg.arc_thickness / 2)
         angle_rad = math.radians(ArcRenderer.to_pil_angle(angle_clock))
-        x_center = (cfg.canvas_size[0] // 2) + cfg.offset_x
-        y_center = (cfg.canvas_size[1] // 2) + cfg.offset_y
+        # Use true center (not integer-truncated) to avoid endpoint drift,
+        # especially visible on the right endcap.
+        x_center = (cfg.canvas_size[0] / 2) + cfg.offset_x
+        y_center = (cfg.canvas_size[1] / 2) + cfg.offset_y
         x = x_center + arc_radius * math.cos(angle_rad)
         y = y_center + arc_radius * math.sin(angle_rad)
         return (x, y)
