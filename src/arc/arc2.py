@@ -40,7 +40,7 @@ class ArcConfig:
     offset_x: int = 0
     offset_y: int = 0
 
-    supersample: int = 4  # replaces "smoothing_factor"
+    supersample: int = 6  # replaces "smoothing_factor"
 
     def __post_init__(self) -> None:
         width, height = self.canvas_size
@@ -93,14 +93,15 @@ class ArcGeometryBuilder:
 
         radius = (diameter / 2) - (thickness / 2)
 
-        cx = (w / 2) + cfg.offset_x * scale
-        cy = (h / 2) + cfg.offset_y * scale
+        # Match legacy behavior: center snaps to integer pixel coordinates.
+        cx = (w // 2) + cfg.offset_x * scale
+        cy = (h // 2) + cfg.offset_y * scale
 
         bbox = (
-            cx - diameter / 2,
-            cy - diameter / 2,
-            cx + diameter / 2,
-            cy + diameter / 2,
+            int(round(cx - diameter / 2)),
+            int(round(cy - diameter / 2)),
+            int(round(cx + diameter / 2)),
+            int(round(cy + diameter / 2)),
         )
 
         return ArcGeometry(bbox=bbox, center=(cx, cy), radius=radius)
@@ -129,62 +130,126 @@ class ArcRenderer:
     def from_pil_angle(pil_angle: float) -> float:
         return (pil_angle + 90) % 360
 
+    @staticmethod
+    def draw_round_cap(
+        draw: ImageDraw.ImageDraw,
+        center: Tuple[float, float],
+        thickness: float,
+        color: Color,
+        scale: int,
+    ) -> None:
+        # Strict legacy cap math from arc.py:
+        # upscale(xy +/- thickness/2) with unscaled center coordinates.
+        r = thickness / 2.0
+        x, y = center
+        draw.ellipse(
+            [
+                scale * (x - r),
+                scale * (y - r),
+                scale * (x + r),
+                scale * (y + r),
+            ],
+            fill=color,
+        )
+
+    @staticmethod
+    def legacy_arc_coords(cfg: ArcConfig, scale: int) -> Tuple[float, float, float, float]:
+        canvas_w = cfg.canvas_size[0]
+        canvas_h = cfg.canvas_size[1]
+        diameter = cfg.arc_diameter
+
+        width = ((canvas_w * scale) - (diameter * scale)) / 2
+        height = ((canvas_h * scale) - (diameter * scale)) / 2
+
+        left = width + (cfg.offset_x * scale)
+        top = height + (cfg.offset_y * scale)
+        right = ((canvas_w * scale) - width) + (cfg.offset_x * scale)
+        bottom = ((canvas_h * scale) - height) + (cfg.offset_y * scale)
+        return (left, top, right, bottom)
+
+    @staticmethod
+    def legacy_cap_center(cfg: ArcConfig, angle_clock: float) -> Tuple[float, float]:
+        arc_radius = (cfg.arc_diameter / 2) - (cfg.arc_thickness / 2)
+        angle_rad = math.radians(ArcRenderer.to_pil_angle(angle_clock))
+        x_center = (cfg.canvas_size[0] // 2) + cfg.offset_x
+        y_center = (cfg.canvas_size[1] // 2) + cfg.offset_y
+        x = x_center + arc_radius * math.cos(angle_rad)
+        y = y_center + arc_radius * math.sin(angle_rad)
+        return (x, y)
+
+    def draw_legacy_arc_layer(
+        self,
+        draw: ImageDraw.ImageDraw,
+        cfg: ArcConfig,
+        scale: int,
+        start_clock: float,
+        end_clock: float,
+        arc_color: Color,
+        endcap_color: Color,
+    ) -> None:
+        start = self.to_pil_angle(start_clock)
+        end = self.to_pil_angle(end_clock)
+        thickness = cfg.arc_thickness * scale
+
+        draw.arc(
+            self.legacy_arc_coords(cfg, scale),
+            start,
+            end,
+            arc_color,
+            thickness,
+        )
+
+        if cfg.show_endcaps:
+            for angle in (start_clock, end_clock):
+                center = self.legacy_cap_center(cfg, angle)
+                self.draw_round_cap(draw, center, cfg.arc_thickness, endcap_color, scale)
+
     def render(self, cfg: ArcConfig) -> Image.Image:
         scale = cfg.supersample
 
         canvas_size = (cfg.canvas_size[0] * scale, cfg.canvas_size[1] * scale)
-        img = Image.new("RGBA", canvas_size, cfg.background)
-        draw = ImageDraw.Draw(img)
-
-        geom = ArcGeometryBuilder.build(cfg, scale)
+        track_hr = Image.new("RGBA", canvas_size, (0, 0, 0, 0))
+        gauge_hr = Image.new("RGBA", canvas_size, (0, 0, 0, 0))
+        track_draw = ImageDraw.Draw(track_hr, "RGBA")
+        gauge_draw = ImageDraw.Draw(gauge_hr, "RGBA")
 
         start = self.to_pil_angle(cfg.start_angle)
         end = self.to_pil_angle(cfg.end_angle)
         full_span = (end - start) % 360
-        gauge_end = (start + (full_span * cfg.gauge_value)) % 360
+        gauge_end_clock = self.from_pil_angle((start + (full_span * cfg.gauge_value)) % 360)
 
-        thickness = cfg.arc_thickness * scale
-
-        draw.arc(
-            geom.bbox,
-            start=start,
-            end=end,
-            fill=cfg.track_color,
-            width=thickness,
+        # Layer 1: background track arc (full range)
+        self.draw_legacy_arc_layer(
+            track_draw,
+            cfg,
+            scale,
+            cfg.start_angle,
+            cfg.end_angle,
+            cfg.track_color,
+            cfg.track_color,
         )
 
-        if cfg.show_endcaps:
-            for angle in (cfg.start_angle, cfg.end_angle):
-                x, y = self.polar_point(geom.center, geom.radius, angle)
-
-                r = thickness / 2
-                draw.ellipse(
-                    [x - r, y - r, x + r, y + r],
-                    fill=cfg.track_color,
-                )
-
-        draw.arc(
-            geom.bbox,
-            start=start,
-            end=gauge_end,
-            fill=cfg.arc_color,
-            width=thickness,
+        # Layer 2: foreground gauge arc (value range)
+        self.draw_legacy_arc_layer(
+            gauge_draw,
+            cfg,
+            scale,
+            cfg.start_angle,
+            gauge_end_clock,
+            cfg.arc_color,
+            cfg.endcap_color,
         )
 
-        if cfg.show_endcaps:
-            gauge_end_clock = self.from_pil_angle(gauge_end)
-            for angle in (cfg.start_angle, gauge_end_clock):
-                x, y = self.polar_point(geom.center, geom.radius, angle)
-
-                r = thickness / 2
-                draw.ellipse(
-                    [x - r, y - r, x + r, y + r],
-                    fill=cfg.endcap_color,
-                )
-
-        # downscale for smoothing
         if scale != 1:
-            img = img.resize(cfg.canvas_size, RESAMPLING_LANCZOS)
+            track_img = track_hr.resize(cfg.canvas_size, RESAMPLING_LANCZOS)
+            gauge_img = gauge_hr.resize(cfg.canvas_size, RESAMPLING_LANCZOS)
+        else:
+            track_img = track_hr
+            gauge_img = gauge_hr
+
+        img = Image.new("RGBA", cfg.canvas_size, cfg.background)
+        img.alpha_composite(track_img)
+        img.alpha_composite(gauge_img)
 
         return img
 
@@ -222,7 +287,7 @@ def main():
         track_color=(70, 70, 70, 220),
         show_endcaps=True,
         endcap_color=(80, 200, 10, 255),
-        supersample=4,
+        supersample=6,
         offset_x=0,
         offset_y=10
     )

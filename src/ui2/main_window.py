@@ -381,7 +381,7 @@ class ArcPreviewWindow(QMainWindow):
 
         self.supersample = QSpinBox()
         self.supersample.setRange(1, 8)
-        self.supersample.setValue(4)
+        self.supersample.setValue(6)
 
         self.show_endcaps = QCheckBox("Enabled")
         self.show_endcaps.setChecked(True)
@@ -509,13 +509,7 @@ class ArcPreviewWindow(QMainWindow):
         )
 
     def _build_preview_config(self, full_cfg: ArcConfig) -> ArcConfig:
-        if full_cfg.supersample <= 2:
-            return full_cfg
-
-        return replace(
-            full_cfg,
-            supersample=min(full_cfg.supersample, 2),
-        )
+        return full_cfg
 
     def render_preview(self) -> None:
         if self._export_in_progress:
