@@ -8,6 +8,11 @@ from PIL import Image, ImageDraw
 
 Color = Tuple[int, int, int, int]
 
+try:
+    RESAMPLING_LANCZOS = Image.Resampling.LANCZOS
+except AttributeError:
+    RESAMPLING_LANCZOS = Image.LANCZOS
+
 
 # -----------------------------
 # Configuration
@@ -33,6 +38,30 @@ class ArcConfig:
     offset_y: int = 0
 
     supersample: int = 4  # replaces "smoothing_factor"
+
+    def __post_init__(self) -> None:
+        width, height = self.canvas_size
+        if width <= 0 or height <= 0:
+            raise ValueError("canvas_size values must be > 0")
+        if self.arc_diameter <= 0:
+            raise ValueError("arc_diameter must be > 0")
+        if self.arc_thickness <= 0:
+            raise ValueError("arc_thickness must be > 0")
+        if self.arc_thickness > self.arc_diameter:
+            raise ValueError("arc_thickness must be <= arc_diameter")
+        if self.supersample < 1:
+            raise ValueError("supersample must be >= 1")
+
+        self._validate_color("background", self.background)
+        self._validate_color("arc_color", self.arc_color)
+        self._validate_color("endcap_color", self.endcap_color)
+
+    @staticmethod
+    def _validate_color(name: str, color: Color) -> None:
+        if len(color) != 4:
+            raise ValueError(f"{name} must be an RGBA tuple of 4 integers")
+        if not all(0 <= channel <= 255 for channel in color):
+            raise ValueError(f"{name} color channels must be between 0 and 255")
 
 
 # -----------------------------
@@ -82,7 +111,9 @@ class ArcRenderer:
         return (clock_angle - 90) % 360
 
     @staticmethod
-    def polar_point(center, radius, angle_deg):
+    def polar_point(
+        center: Tuple[float, float], radius: float, angle_deg: float
+    ) -> Tuple[float, float]:
         angle_rad = math.radians(ArcRenderer.to_pil_angle(angle_deg))
         x = center[0] + radius * math.cos(angle_rad)
         y = center[1] + radius * math.sin(angle_rad)
@@ -122,7 +153,7 @@ class ArcRenderer:
 
         # downscale for smoothing
         if scale != 1:
-            img = img.resize(cfg.canvas_size, Image.Resampling.LANCZOS)
+            img = img.resize(cfg.canvas_size, RESAMPLING_LANCZOS)
 
         return img
 
