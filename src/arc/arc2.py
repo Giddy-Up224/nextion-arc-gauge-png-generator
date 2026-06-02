@@ -11,7 +11,7 @@ Color = Tuple[int, int, int, int]
 try:
     RESAMPLING_LANCZOS = Image.Resampling.LANCZOS
 except AttributeError:
-    RESAMPLING_LANCZOS = Image.LANCZOS
+    RESAMPLING_LANCZOS = Image.LANCZOS  # type: ignore[attr-defined]
 
 
 # -----------------------------
@@ -29,7 +29,10 @@ class ArcConfig:
     start_angle: float = 235
     end_angle: float = 125
 
+    gauge_value: float = 1.0  # 0.0 to 1.0
+
     arc_color: Color = (50, 50, 50, 255)
+    track_color: Color = (35, 35, 35, 200)
 
     show_endcaps: bool = True
     endcap_color: Color = (50, 50, 50, 255)
@@ -51,9 +54,12 @@ class ArcConfig:
             raise ValueError("arc_thickness must be <= arc_diameter")
         if self.supersample < 1:
             raise ValueError("supersample must be >= 1")
+        if not 0.0 <= self.gauge_value <= 1.0:
+            raise ValueError("gauge_value must be between 0.0 and 1.0")
 
         self._validate_color("background", self.background)
         self._validate_color("arc_color", self.arc_color)
+        self._validate_color("track_color", self.track_color)
         self._validate_color("endcap_color", self.endcap_color)
 
     @staticmethod
@@ -119,6 +125,10 @@ class ArcRenderer:
         y = center[1] + radius * math.sin(angle_rad)
         return x, y
 
+    @staticmethod
+    def from_pil_angle(pil_angle: float) -> float:
+        return (pil_angle + 90) % 360
+
     def render(self, cfg: ArcConfig) -> Image.Image:
         scale = cfg.supersample
 
@@ -130,6 +140,8 @@ class ArcRenderer:
 
         start = self.to_pil_angle(cfg.start_angle)
         end = self.to_pil_angle(cfg.end_angle)
+        full_span = (end - start) % 360
+        gauge_end = (start + (full_span * cfg.gauge_value)) % 360
 
         thickness = cfg.arc_thickness * scale
 
@@ -137,12 +149,21 @@ class ArcRenderer:
             geom.bbox,
             start=start,
             end=end,
+            fill=cfg.track_color,
+            width=thickness,
+        )
+
+        draw.arc(
+            geom.bbox,
+            start=start,
+            end=gauge_end,
             fill=cfg.arc_color,
             width=thickness,
         )
 
         if cfg.show_endcaps:
-            for angle in (cfg.start_angle, cfg.end_angle):
+            gauge_end_clock = self.from_pil_angle(gauge_end)
+            for angle in (cfg.start_angle, gauge_end_clock):
                 x, y = self.polar_point(geom.center, geom.radius, angle)
 
                 r = thickness / 2
@@ -186,7 +207,9 @@ def main():
         arc_thickness=10,
         start_angle=235,
         end_angle=125,
+        gauge_value=0.72,
         arc_color=(80, 200, 10, 255),
+        track_color=(70, 70, 70, 220),
         show_endcaps=True,
         endcap_color=(80, 200, 10, 255),
         supersample=4,

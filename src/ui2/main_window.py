@@ -80,7 +80,8 @@ class SequenceExportWorker(QRunnable):
     def run(self) -> None:
         try:
             for idx in range(self.count):
-                cfg = replace(self.base_cfg, end_angle=self.base_cfg.end_angle + (idx * self.step))
+                value = max(0.0, min(1.0, self.base_cfg.gauge_value + (idx * self.step)))
+                cfg = replace(self.base_cfg, gauge_value=value)
                 filename = f"{self.prefix}_{idx:04d}.png"
                 ArcGenerator(cfg).save(str(self.out_dir / filename))
                 self.signals.progress.emit(idx + 1, self.count)
@@ -363,6 +364,12 @@ class ArcPreviewWindow(QMainWindow):
         self.end_angle.setSingleStep(1)
         self.end_angle.setValue(125.0)
 
+        self.gauge_value = QDoubleSpinBox()
+        self.gauge_value.setRange(0.0, 100.0)
+        self.gauge_value.setDecimals(2)
+        self.gauge_value.setSingleStep(1.0)
+        self.gauge_value.setValue(75.0)
+
         self.offset_x = QSpinBox()
         self.offset_x.setRange(-2048, 2048)
         self.offset_x.setValue(0)
@@ -379,6 +386,7 @@ class ArcPreviewWindow(QMainWindow):
         self.show_endcaps.setChecked(True)
 
         self.arc_color = ColorButton((80, 200, 10, 255), "Arc Color")
+        self.track_color = ColorButton((70, 70, 70, 220), "Track Color")
         self.endcap_color = ColorButton((80, 200, 10, 255), "Endcap Color")
         self.background_color = ColorButton((0, 0, 0, 0), "Background")
 
@@ -387,12 +395,14 @@ class ArcPreviewWindow(QMainWindow):
         form.addRow("Thickness", self.arc_thickness)
         form.addRow("Start Angle", self.start_angle)
         form.addRow("End Angle", self.end_angle)
+        form.addRow("Gauge Value %", self.gauge_value)
         form.addRow("Offset X", self.offset_x)
         form.addRow("Offset Y", self.offset_y)
         form.addRow("Supersample", self.supersample)
-        form.addRow("Endcaps", self.show_endcaps)
-        form.addRow("Arc", self.arc_color)
-        form.addRow("Endcaps", self.endcap_color)
+        form.addRow("Show Endcaps", self.show_endcaps)
+        form.addRow("Gauge Arc", self.arc_color)
+        form.addRow("Track Arc", self.track_color)
+        form.addRow("Endcap Color", self.endcap_color)
         form.addRow("Background", self.background_color)
 
         out_box = QGroupBox("Output")
@@ -421,17 +431,17 @@ class ArcPreviewWindow(QMainWindow):
         self.sequence_count.setValue(10)
 
         self.sequence_step = QDoubleSpinBox()
-        self.sequence_step.setRange(0.01, 360.0)
+        self.sequence_step.setRange(0.01, 100.0)
         self.sequence_step.setDecimals(2)
-        self.sequence_step.setValue(5.0)
+        self.sequence_step.setValue(1.0)
 
         self.sequence_prefix = QLineEdit("arc")
-        self.export_sequence_btn = QPushButton("Export End-Angle Sweep")
+        self.export_sequence_btn = QPushButton("Export Gauge Value Sweep")
         self.export_sequence_btn.clicked.connect(self._export_sequence)
 
         seq_grid.addWidget(QLabel("Count"), 0, 0)
         seq_grid.addWidget(self.sequence_count, 0, 1)
-        seq_grid.addWidget(QLabel("Step (deg)"), 1, 0)
+        seq_grid.addWidget(QLabel("Step (% points)"), 1, 0)
         seq_grid.addWidget(self.sequence_step, 1, 1)
         seq_grid.addWidget(QLabel("File Prefix"), 2, 0)
         seq_grid.addWidget(self.sequence_prefix, 2, 1)
@@ -454,11 +464,13 @@ class ArcPreviewWindow(QMainWindow):
             self.arc_thickness,
             self.start_angle,
             self.end_angle,
+            self.gauge_value,
             self.offset_x,
             self.offset_y,
             self.supersample,
             self.show_endcaps,
             self.arc_color,
+            self.track_color,
             self.endcap_color,
             self.background_color,
         ]
@@ -485,7 +497,9 @@ class ArcPreviewWindow(QMainWindow):
             arc_thickness=self.arc_thickness.value(),
             start_angle=self.start_angle.value(),
             end_angle=self.end_angle.value(),
+            gauge_value=self.gauge_value.value() / 100.0,
             arc_color=self.arc_color.value(),
+            track_color=self.track_color.value(),
             show_endcaps=self.show_endcaps.isChecked(),
             endcap_color=self.endcap_color.value(),
             offset_x=self.offset_x.value(),
@@ -627,7 +641,7 @@ class ArcPreviewWindow(QMainWindow):
             base_cfg = self._build_config()
             out_dir = self._resolve_output_dir()
             count = self.sequence_count.value()
-            step = self.sequence_step.value()
+            step = self.sequence_step.value() / 100.0
             prefix = self.sequence_prefix.text().strip() or "arc"
         except Exception as exc:
             QMessageBox.critical(self, "Export Failed", str(exc))
