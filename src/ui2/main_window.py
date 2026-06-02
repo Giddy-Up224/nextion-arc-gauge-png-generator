@@ -369,7 +369,7 @@ class ArcPreviewWindow(QMainWindow):
         self.gauge_value.setRange(0.0, 100.0)
         self.gauge_value.setDecimals(2)
         self.gauge_value.setSingleStep(1.0)
-        self.gauge_value.setValue(75.0)
+        self.gauge_value.setValue(50.0)
 
         self.offset_x = QSpinBox()
         self.offset_x.setRange(-2048, 2048)
@@ -386,11 +386,11 @@ class ArcPreviewWindow(QMainWindow):
         self.show_endcaps = QCheckBox("Enabled")
         self.show_endcaps.setChecked(True)
         self.match_endcap_color = QCheckBox("Match Gauge Arc")
-        self.match_endcap_color.setChecked(False)
+        self.match_endcap_color.setChecked(True)
 
-        self.arc_color = ColorButton((80, 200, 10, 255), "Arc Color")
-        self.track_color = ColorButton((70, 70, 70, 220), "Track Color")
-        self.endcap_color = ColorButton((80, 200, 10, 255), "Endcap Color")
+        self.arc_color = ColorButton((255, 255, 255, 255), "Arc Color")
+        self.track_color = ColorButton((118, 120, 123, 255), "Track Color")
+        self.endcap_color = ColorButton((255, 255, 255, 255), "Endcap Color")
         self.background_color = ColorButton((0, 0, 0, 0), "Background")
 
         form.addRow("Canvas", size_row)
@@ -411,6 +411,7 @@ class ArcPreviewWindow(QMainWindow):
 
         self.match_endcap_color.toggled.connect(self._on_match_endcap_toggled)
         self.arc_color.clicked.connect(self._sync_endcap_if_linked)
+        self._on_match_endcap_toggled(self.match_endcap_color.isChecked())
 
         out_box = QGroupBox("Output")
         out_grid = QGridLayout(out_box)
