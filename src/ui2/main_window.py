@@ -4,6 +4,7 @@ from dataclasses import replace
 from pathlib import Path
 from time import perf_counter
 from typing import Optional
+import sys
 
 from PIL.ImageQt import ImageQt
 from PySide6.QtCore import QObject, QRunnable, QThreadPool, QTimer, Qt, Signal
@@ -31,6 +32,12 @@ from PySide6.QtWidgets import (
 )
 
 from arc.arc2 import ArcConfig, ArcGenerator
+
+
+def resource_path(relative_path: str) -> str:
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return str(Path(getattr(sys, "_MEIPASS")) / relative_path)
+    return str(Path(relative_path))
 
 
 class PreviewRenderSignals(QObject):
@@ -262,8 +269,8 @@ class ArcPreviewView(QGraphicsView):
 class ArcPreviewWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("Arc Gauge Previewer")
-        self.setWindowIcon(QIcon("img/R.png"))
+        self.setWindowTitle("Arcy: Arc Gauge Generator")
+        self.setWindowIcon(QIcon(resource_path("img/Arcy.png")))
         self.resize(1260, 760)
 
         self._latest_pixmap: Optional[QPixmap] = None
