@@ -43,9 +43,12 @@ def clean():
 
 def build_executable():
     venv_python = os.path.join(VENV_DIR, "Scripts", "python.exe") if os.name == "nt" else os.path.join(VENV_DIR, "bin", "python")
+    data_sep = ";" if os.name == "nt" else ":"
     cmd = [
         venv_python, "-m", "PyInstaller",
         "--onefile",
+        "--windowed",
+        f"--add-data=img{data_sep}img",
         f"--name={PROGRAM_NAME}",
         f"{MAIN_PATH}"
     ]
