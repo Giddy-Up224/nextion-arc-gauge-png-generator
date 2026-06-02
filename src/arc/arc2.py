@@ -190,6 +190,8 @@ def main():
         show_endcaps=True,
         endcap_color=(80, 200, 10, 255),
         supersample=4,
+        offset_x=0,
+        offset_y=10
     )
 
     ArcGenerator(cfg).save("test/test.png")
