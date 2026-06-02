@@ -2,9 +2,10 @@
 
 # 1. Default entrypoint is src/main.py unless explicitly provided.
 # 2. Image assets are bundled from img/ via PyInstaller --add-data.
-# 3. App icon is expected at img/{PROGRAM_NAME}.ico (if present).
-# 4. Python dependencies are installed from requirements.txt.
-# 5. Default packaging virtual environment folder is instvenv.
+# 3. License and notice files are bundled from licenses/ and THIRD_PARTY_NOTICES.md.
+# 4. App icon is expected at img/{PROGRAM_NAME}.ico (if present).
+# 5. Python dependencies are installed from requirements.txt.
+# 6. Default packaging virtual environment folder is instvenv.
 
 # These are intentional defaults for this project's build workflow.
 
@@ -59,6 +60,8 @@ def build_executable():
         "--onefile",
         "--windowed",
         f"--add-data=img{data_sep}img",
+        f"--add-data=licenses{data_sep}licenses",
+        f"--add-data=THIRD_PARTY_NOTICES.md{data_sep}.",
         f"--name={PROGRAM_NAME}",
         f"{MAIN_PATH}"
     ]
