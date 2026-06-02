@@ -385,6 +385,8 @@ class ArcPreviewWindow(QMainWindow):
 
         self.show_endcaps = QCheckBox("Enabled")
         self.show_endcaps.setChecked(True)
+        self.match_endcap_color = QCheckBox("Match Gauge Arc")
+        self.match_endcap_color.setChecked(False)
 
         self.arc_color = ColorButton((80, 200, 10, 255), "Arc Color")
         self.track_color = ColorButton((70, 70, 70, 220), "Track Color")
@@ -401,10 +403,14 @@ class ArcPreviewWindow(QMainWindow):
         form.addRow("Offset Y", self.offset_y)
         form.addRow("Supersample", self.supersample)
         form.addRow("Show Endcaps", self.show_endcaps)
+        form.addRow("Endcaps Follow Arc", self.match_endcap_color)
         form.addRow("Gauge Arc", self.arc_color)
         form.addRow("Track Arc", self.track_color)
         form.addRow("Endcap Color", self.endcap_color)
         form.addRow("Background", self.background_color)
+
+        self.match_endcap_color.toggled.connect(self._on_match_endcap_toggled)
+        self.arc_color.clicked.connect(self._sync_endcap_if_linked)
 
         out_box = QGroupBox("Output")
         out_grid = QGridLayout(out_box)
@@ -470,6 +476,7 @@ class ArcPreviewWindow(QMainWindow):
             self.offset_y,
             self.supersample,
             self.show_endcaps,
+            self.match_endcap_color,
             self.arc_color,
             self.track_color,
             self.endcap_color,
@@ -491,6 +498,12 @@ class ArcPreviewWindow(QMainWindow):
             self._debounce.start()
 
     def _build_config(self) -> ArcConfig:
+        resolved_endcap_color = (
+            self.arc_color.value()
+            if self.match_endcap_color.isChecked()
+            else self.endcap_color.value()
+        )
+
         return ArcConfig(
             canvas_size=(self.canvas_w.value(), self.canvas_h.value()),
             background=self.background_color.value(),
@@ -502,11 +515,20 @@ class ArcPreviewWindow(QMainWindow):
             arc_color=self.arc_color.value(),
             track_color=self.track_color.value(),
             show_endcaps=self.show_endcaps.isChecked(),
-            endcap_color=self.endcap_color.value(),
+            endcap_color=resolved_endcap_color,
             offset_x=self.offset_x.value(),
             offset_y=self.offset_y.value(),
             supersample=self.supersample.value(),
         )
+
+    def _on_match_endcap_toggled(self, checked: bool) -> None:
+        self.endcap_color.setEnabled(not checked)
+        self._sync_endcap_if_linked()
+        self._schedule_render()
+
+    def _sync_endcap_if_linked(self) -> None:
+        if self.match_endcap_color.isChecked():
+            self.endcap_color.set_value(self.arc_color.value())
 
     def _build_preview_config(self, full_cfg: ArcConfig) -> ArcConfig:
         return full_cfg
