@@ -58,3 +58,14 @@ This project uses PySide6/Qt and other dependencies that are licensed separately
 
 - Third-party notices: THIRD_PARTY_NOTICES.md
 - Included license texts: licenses/LGPL-3.0.txt, licenses/GPL-2.0.txt, licenses/GPL-3.0.txt, licenses/Qt-GPL-exception-1.0.txt, licenses/LicenseRef-Qt-Commercial.txt
+
+## Support
+
+If this project saves you time or helps your Nextion workflow, please consider sponsoring development.
+
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-pink?logo=github)](https://github.com/sponsors/Giddy-Up224)
+
+Sponsorship helps with:
+- Ongoing maintenance and bug fixes
+- New rendering/export features
+- Documentation and examples
