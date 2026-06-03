@@ -16,7 +16,7 @@ Nextion, Nextion HMI, Nextion gauge, arc gauge, radial gauge, PNG generator, gau
 
 ## Preview UI
 
-<img src="img/snip.png" width="1000">
+<img src="img/arcy.gif" width="1000">
 
 ## How To Run The Image Generator
 
