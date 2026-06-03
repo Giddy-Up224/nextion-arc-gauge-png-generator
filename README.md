@@ -18,7 +18,7 @@ Nextion, Nextion HMI, Nextion gauge, arc gauge, radial gauge, PNG generator, gau
 
 <img src="img/snip.png" width="1000">
 
-## Use It
+## How To Run The Image Generator
 
 ### Options
 
@@ -41,9 +41,8 @@ python3 pkg.py Arcy src/ui2/main.py
 ```shell
 # First create a venv and install the dependencies.
 # Windows
-# TODO: Add PowerShell script for windows
+./venv.ps1
 
-# I've created a basic shell script to make this easy:
 # Unix
 ./venv.sh
 ```
