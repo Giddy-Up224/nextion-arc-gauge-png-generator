@@ -18,7 +18,15 @@ Nextion, Nextion HMI, Nextion gauge, arc gauge, radial gauge, PNG generator, gau
 
 <img src="img/snip.png" width="1000">
 
-## Build a Python Distributable
+## Use It
+
+### Options
+
+* Download the appropriate executable from [Releases](../../releases)
+* [Run as Python script](./README.md#run-as-python-script)
+* Bundle it using PyInstaller. You can use `build_script.py` to make it easy. Command is shown in [Build a Python Distributable](./README.md#build-a-python-distributable)
+
+### Build a Python Distributable
 
 ```shell
 # Windows:
@@ -26,6 +34,23 @@ python.exe pkg.py Arcy src/ui2/main.py
 
 # Unix:
 python3 pkg.py Arcy src/ui2/main.py
+```
+
+### Run As Python Script
+
+```shell
+# First create a venv and install the dependencies.
+# Windows
+# TODO: Add PowerShell script for windows
+
+# I've created a basic shell script to make this easy:
+# Unix
+./venv.sh
+```
+
+```shell
+# Make sure to run in the activated venv created in the step above.
+python src/ui2/main.py
 ```
 
 ## Third-Party Licenses
