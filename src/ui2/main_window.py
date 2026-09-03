@@ -93,7 +93,7 @@ class SequenceExportWorker(QRunnable):
                 foreground = f"{r:02X}{g:02X}{b:02X}"
                 r, g, b, a = self.base_cfg.track_color
                 background = f"{r:02X}{g:02X}{b:02X}"
-                filename = f"{self.prefix}_{idx:03d} #{foreground} #{background}.png"
+                filename = f"{self.prefix}_{value * 100:03.0f} #{foreground} #{background}.png"
                 ArcGenerator(cfg).save(str(self.out_dir / filename))
                 self.signals.progress.emit(idx + 1, self.count)
 
