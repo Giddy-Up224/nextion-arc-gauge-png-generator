@@ -81,18 +81,18 @@ def main():
         else:
             cmd = 'python3'
         print(f"Usage: {cmd} pkg.py [optional]<name-for-your-executable> [optional]<path-to-main.py> [optional]<venv-folder>")
-        print(f"Example: {cmd} pkg.py MyApp src/main.py instvenv")
+        print(f"Example: {cmd} pkg.py MyApp src/ui2/main.py instvenv")
         print("MyApp is simply the name that you wish to be used for your app.")
-        print("If no app name is provided, it will default to UNTITLED")
-        print("Path to main must be specified if not in default location: src/main.py")
+        print("If no app name is provided, it will default to \'Arcy\'")
+        print("Path to main must be specified if not in default location: src/ui2/main.py")
         print("Venv folder defaults to instvenv")
         sys.exit()
 
     global PROGRAM_NAME
     global MAIN_PATH
     global VENV_DIR
-    PROGRAM_NAME = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != '' else 'UNTITLED'
-    MAIN_PATH    = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] != '' else 'src/main.py'
+    PROGRAM_NAME = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != '' else 'Arcy'
+    MAIN_PATH    = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] != '' else 'src/ui2/main.py'
     VENV_DIR     = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] != '' else 'instvenv'
     
     if not os.path.exists(MAIN_PATH):
