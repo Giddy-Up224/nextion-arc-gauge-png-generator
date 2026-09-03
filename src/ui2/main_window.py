@@ -89,7 +89,11 @@ class SequenceExportWorker(QRunnable):
             for idx in range(self.count):
                 value = max(0.0, min(1.0, self.base_cfg.gauge_value + (idx * self.step)))
                 cfg = replace(self.base_cfg, gauge_value=value)
-                filename = f"{self.prefix}_{idx:04d}.png"
+                r, g, b, a = self.base_cfg.arc_color
+                foreground = f"{r:02X}{g:02X}{b:02X}"
+                r, g, b, a = self.base_cfg.track_color
+                background = f"{r:02X}{g:02X}{b:02X}"
+                filename = f"{self.prefix}_{idx:03d} #{foreground} #{background}.png"
                 ArcGenerator(cfg).save(str(self.out_dir / filename))
                 self.signals.progress.emit(idx + 1, self.count)
 
