@@ -1,0 +1,67 @@
+name: Auto Release
+run-name: Create new release
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Build binary
+        run: python pkg.py
+
+      - name: Flatten macOS app bundle
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          app_path=$(find dist -type d -name '*.app' -prune -print -quit)
+          executable_path=$(find "$app_path/Contents/MacOS" -type f -print -quit)
+          mv "$executable_path" "dist/$(basename "$executable_path")"
+          rm -rf "$app_path"
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: binary-${{ matrix.os }}
+          path: dist/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout (for tag metadata)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Download all binaries
+        uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+
+      - name: Get tag message
+        id: tag
+        run: |
+          echo "title=$(git tag -l --format='%(contents:subject)' ${GITHUB_REF_NAME})" >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v3
+        with:
+          name: ${{ steps.tag.outputs.title }}
+          generate_release_notes: true
+          files: artifacts/**/*
