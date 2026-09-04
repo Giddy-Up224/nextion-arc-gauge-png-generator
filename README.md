@@ -26,6 +26,12 @@ Nextion, Nextion HMI, Nextion gauge, arc gauge, radial gauge, PNG generator, gau
 * [Run as Python script](./README.md#run-as-python-script)
 * Bundle it using PyInstaller. You can use `build_script.py` to make it easy. Command is shown in [Build a Python Distributable](./README.md#build-a-python-distributable)
 
+### Install
+
+For Windows and Linux, simply download the executable from [Releases] and run it as a portable app.
+
+For macOS, you will need to run it as a Python script or build it using `pkg.py`. (see instructions below)
+
 ### Build a Python Distributable
 
 ```shell
