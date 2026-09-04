@@ -3,7 +3,8 @@
 # 1. Default entrypoint is src/main.py unless explicitly provided.
 # 2. Image assets are bundled from img/ via PyInstaller --add-data.
 # 3. License and notice files are bundled from licenses/ and THIRD_PARTY_NOTICES.md.
-# 4. App icon is expected at img/{PROGRAM_NAME}.ico (if present).
+# 4. !!!CHANGE THIS TO YOUR img NAME!!!
+ICON_PATH = "img/Arcy.ico"
 # 5. Python dependencies are installed from requirements.txt.
 # 6. Default packaging virtual environment folder is instvenv.
 
@@ -77,9 +78,8 @@ def build_executable():
         if os.path.exists(src):
             cmd.append(f"--add-data={src}{data_sep}{dest}")
 
-    icon_path = os.path.join("img", f"{PROGRAM_NAME}.ico")
-    if os.path.isfile(icon_path):
-        cmd.append(f"--icon={icon_path}")
+    if os.path.isfile(ICON_PATH):
+        cmd.append(f"--icon={ICON_PATH}")
 
     cmd.append(MAIN_PATH)
 
