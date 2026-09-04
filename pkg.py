@@ -13,10 +13,20 @@ import subprocess
 import shutil
 import os
 import sys
+import platform
 
 PROGRAM_NAME = ''
 MAIN_PATH    = ''
 VENV_DIR     = 'instvenv'
+
+def get_platform_suffix():
+    os_map = {"Windows": "Win", "Linux": "Linux", "Darwin": "macOS"}
+    os_name = os_map.get(platform.system(), platform.system())
+
+    arch_map = {"amd64": "x64", "x86_64": "x64", "aarch64": "arm64", "arm64": "arm64"}
+    arch = arch_map.get(platform.machine().lower(), platform.machine().lower())
+
+    return f"{os_name}_{arch}"
 
 def venv_exists():
     if os.name == "nt":
@@ -59,16 +69,19 @@ def build_executable():
         venv_python, "-m", "PyInstaller",
         "--onefile",
         "--windowed",
-        f"--add-data=img{data_sep}img",
-        f"--add-data=licenses{data_sep}licenses",
-        f"--add-data=THIRD_PARTY_NOTICES.md{data_sep}.",
         f"--name={PROGRAM_NAME}",
-        f"{MAIN_PATH}"
     ]
+
+    # PyInstaller errors out on --add-data paths that don't exist, so only bundle what's present
+    for src, dest in (("img", "img"), ("licenses", "licenses"), ("THIRD_PARTY_NOTICES.md", ".")):
+        if os.path.exists(src):
+            cmd.append(f"--add-data={src}{data_sep}{dest}")
 
     icon_path = os.path.join("img", f"{PROGRAM_NAME}.ico")
     if os.path.isfile(icon_path):
-        cmd.insert(3, f"--icon={icon_path}")
+        cmd.append(f"--icon={icon_path}")
+
+    cmd.append(MAIN_PATH)
 
     subprocess.run(cmd, check=True)
 
@@ -92,6 +105,7 @@ def main():
     global MAIN_PATH
     global VENV_DIR
     PROGRAM_NAME = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != '' else 'Arcy'
+    PROGRAM_NAME = f"{PROGRAM_NAME}_{get_platform_suffix()}"
     MAIN_PATH    = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] != '' else 'src/ui2/main.py'
     VENV_DIR     = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] != '' else 'instvenv'
     
